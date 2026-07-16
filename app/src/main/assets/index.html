@@ -19,8 +19,7 @@
   html,body{height:100%}
   body{
     font-family:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-    background:var(--bg);color:var(--text);overflow:hidden;
-    -webkit-font-smoothing:antialiased;
+    background:var(--bg);color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased;
   }
   #app{height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;background:var(--bg)}
   .hidden{display:none !important}
@@ -28,65 +27,76 @@
   .screen.active,.view.active{display:flex;flex-direction:column;flex:1;min-height:0}
 
   /* ===== Auth ===== */
-  #screen-auth{flex:1;padding:32px 24px;justify-content:center;gap:18px}
-  .brand{text-align:center;margin-bottom:8px}
-  .brand .logo{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--yellow));display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px;box-shadow:0 8px 24px var(--accent-soft)}
-  .brand h1{font-size:26px;font-weight:700}
+  #screen-auth{flex:1;padding:28px 22px;justify-content:center;gap:16px;overflow-y:auto}
+  .brand{text-align:center}
+  .brand .logo{width:62px;height:62px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--yellow));display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 12px;box-shadow:0 8px 24px var(--accent-soft)}
+  .brand h1{font-size:25px;font-weight:700}
   .brand p{color:var(--sub);font-size:13px;margin-top:6px}
   .seg{display:flex;background:var(--card);border-radius:14px;padding:4px;gap:4px}
   .seg button{flex:1;border:0;background:transparent;color:var(--sub);padding:11px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
   .seg button.on{background:var(--accent);color:#1a1206}
-  .form{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+  .auth-methods{display:flex;background:var(--card2);border-radius:12px;padding:4px;gap:4px;margin-bottom:4px}
+  .auth-methods button{flex:1;border:0;background:transparent;color:var(--sub);padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer}
+  .auth-methods button.on{background:var(--accent);color:#1a1206}
+  .form{display:flex;flex-direction:column;gap:13px;margin-top:4px}
   .field{display:flex;flex-direction:column;gap:6px}
   .field label{font-size:13px;color:var(--sub);padding-left:4px}
-  .field input{background:var(--card);border:1.5px solid var(--line);border-radius:12px;color:var(--text);padding:14px 14px;font-size:15px;outline:none;transition:.15s}
+  .field input,textarea{background:var(--card);border:1.5px solid var(--line);border-radius:12px;color:var(--text);padding:13px 14px;font-size:15px;outline:none;transition:.15s;width:100%;font-family:inherit}
   .field input:focus{border-color:var(--accent)}
   .field.err input{border-color:var(--red)}
   .field .msg{font-size:12px;color:var(--red);padding-left:4px;min-height:14px}
+  .code-row{display:flex;gap:10px}
+  .code-row input{flex:1}
+  .code-btn{white-space:nowrap;background:var(--card2);border:1.5px solid var(--line);color:var(--accent);border-radius:12px;padding:0 14px;font-size:13px;font-weight:600;cursor:pointer}
+  .code-btn:disabled{color:var(--sub);cursor:default}
   .btn{background:var(--accent);color:#1a1206;border:0;border-radius:14px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;transition:.15s}
   .btn:active{transform:scale(.98)}
   .btn[disabled]{opacity:.5}
   .btn.ghost{background:var(--card);color:var(--text)}
   .btn.green{background:var(--green);color:#06231a}
-  .hint{text-align:center;color:var(--sub);font-size:12px;margin-top:4px}
+  .btn.wx{background:#07C160;color:#fff}
+  .hint{text-align:center;color:var(--sub);font-size:12px;margin-top:2px}
   .hint a{color:var(--accent);cursor:pointer}
+  .divider{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:12px;margin:2px 0}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
 
   /* ===== Main layout ===== */
-  #topbar{padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  #topbar{padding:calc(env(safe-area-inset-top,0px) + 14px) 18px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
   #topbar .tb-title{font-size:20px;font-weight:700}
-  #topbar .tb-sub{font-size:12px;color:var(--sub);margin-top:2px}
   #topbar .tb-icon{width:40px;height:40px;border-radius:12px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer}
-  #views{flex:1;overflow-y:auto;padding:8px 18px calc(20px + var(--safe-b))}
+  #views{flex:1;overflow-y:auto;padding:6px 16px calc(16px + var(--safe-b));scrollbar-width:none}
   #views::-webkit-scrollbar{width:0}
   .view{padding-bottom:8px}
 
-  .card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:14px}
+  .card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:12px}
   .card.tap{cursor:pointer;transition:.15s}
   .card.tap:active{transform:scale(.99)}
   .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .muted{color:var(--sub);font-size:13px}
   .accent{color:var(--accent)}
-  .green{color:var(--green)}
+  .badge{font-size:11px;padding:2px 8px;border-radius:8px;background:var(--card2);color:var(--sub)}
+  .badge.demo{color:var(--yellow);background:#FFB34722}
+  .badge.real{color:var(--green);background:#4ED5A222}
 
-  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  .stat{background:var(--card);border-radius:16px;padding:16px}
-  .stat .v{font-size:24px;font-weight:700;margin-top:4px}
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat{background:var(--card);border-radius:16px;padding:14px}
+  .stat .v{font-size:23px;font-weight:700;margin-top:4px}
   .stat .u{font-size:12px;color:var(--sub);margin-left:3px;font-weight:400}
   .stat .k{font-size:12px;color:var(--sub)}
 
-  .bigbtn{width:100%;background:linear-gradient(135deg,var(--accent),var(--yellow));color:#1a1206;border:0;border-radius:18px;padding:18px;font-size:18px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 10px 30px var(--accent-soft)}
+  .bigbtn{width:100%;background:linear-gradient(135deg,var(--accent),var(--yellow));color:#1a1206;border:0;border-radius:18px;padding:17px;font-size:18px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 10px 30px var(--accent-soft)}
   .bigbtn:active{transform:scale(.98)}
 
-  .week{display:flex;justify-content:space-between;align-items:flex-end;height:110px;gap:8px;margin-top:8px}
+  .week{display:flex;justify-content:space-between;align-items:flex-end;height:108px;gap:8px;margin-top:8px}
   .week .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
   .week .bar{width:100%;max-width:22px;background:var(--card2);border-radius:6px 6px 3px 3px;position:relative;overflow:hidden}
   .week .bar i{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(var(--accent),var(--yellow));border-radius:6px}
   .week .lab{font-size:11px;color:var(--sub)}
   .week .day.today .lab{color:var(--accent);font-weight:700}
 
-  .list-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .list-item{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
   .list-item:last-child{border-bottom:0}
-  .list-item .ic{width:44px;height:44px;border-radius:13px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .list-item .ic{width:42px;height:42px;border-radius:13px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
   .list-item .main{flex:1;min-width:0}
   .list-item .main .t{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .list-item .main .s{font-size:12px;color:var(--sub);margin-top:2px}
@@ -97,22 +107,24 @@
 
   .progress{height:8px;border-radius:6px;background:var(--card2);overflow:hidden;margin-top:10px}
   .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--yellow));border-radius:6px;transition:.3s}
+  .mini-btn{width:30px;height:30px;border-radius:9px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer}
+  .plan-meta{font-size:11px;color:var(--sub);margin-top:5px}
 
   /* ===== Run tracker ===== */
-  #screen-run{align-items:center;justify-content:center;padding:24px;text-align:center}
-  .run-ring{width:240px;height:240px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p,0)*1%),var(--card) 0);display:flex;align-items:center;justify-content:center;position:relative;margin:10px 0}
-  .run-ring .inner{width:196px;height:196px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .run-time{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:1px}
+  #screen-run{align-items:center;justify-content:center;padding:22px;text-align:center}
+  .run-ring{width:232px;height:232px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p,0)*1%),var(--card) 0);display:flex;align-items:center;justify-content:center;position:relative;margin:8px 0}
+  .run-ring .inner{width:190px;height:190px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .run-time{font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:1px}
   .run-sub{color:var(--sub);font-size:13px;margin-top:4px}
-  .run-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;margin:18px 0}
+  .run-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;margin:16px 0}
   .run-stat{background:var(--card);border-radius:14px;padding:12px}
-  .run-stat .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+  .run-stat .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
   .run-stat .k{font-size:11px;color:var(--sub);margin-top:3px}
   .run-controls{display:flex;gap:12px;width:100%}
   .run-controls .btn{flex:1}
-  .run-idle .big{font-size:64px;margin-bottom:10px}
+  .run-idle .big{font-size:60px;margin-bottom:8px}
   .run-idle .t{font-size:22px;font-weight:700}
-  .run-idle .s{color:var(--sub);font-size:13px;margin:8px 0 22px}
+  .run-idle .s{color:var(--sub);font-size:13px;margin:8px 0 20px}
 
   /* ===== Tab bar ===== */
   #tabbar{display:flex;background:#121214;border-top:1px solid var(--line);padding:8px 6px calc(8px + var(--safe-b));flex-shrink:0}
@@ -123,11 +135,12 @@
   /* ===== Modal ===== */
   #modal-root{position:fixed;inset:0;background:#000a;display:none;align-items:flex-end;justify-content:center;z-index:50}
   #modal-root.show{display:flex}
-  .modal{background:var(--card);width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:22px 20px calc(22px + var(--safe-b));max-height:88%;overflow-y:auto;animation:up .22s ease}
+  .modal{background:var(--card);width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:22px 18px calc(22px + var(--safe-b));max-height:88%;overflow-y:auto;animation:up .22s ease}
   @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
   .modal h3{font-size:18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
   .modal .close{font-size:22px;color:var(--sub);cursor:pointer;background:none;border:0}
-  .opt{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line)}
+  .modal textarea{resize:vertical;min-height:90px}
+  .opt{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)}
   .opt:last-child{border-bottom:0}
   .seg-sm{display:flex;background:var(--card2);border-radius:10px;padding:3px}
   .seg-sm button{border:0;background:transparent;color:var(--sub);padding:8px 14px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
@@ -138,14 +151,19 @@
   .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#000d;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:80%;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  .summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0}
+  .summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
   .summary-grid .st{background:var(--card2);border-radius:14px;padding:14px;text-align:center}
   .summary-grid .st .v{font-size:22px;font-weight:700}
   .summary-grid .st .k{font-size:12px;color:var(--sub);margin-top:4px}
-  .empty{text-align:center;color:var(--sub);padding:40px 0;font-size:14px}
-  .avatar{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--yellow));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#1a1206}
-  .dev{display:flex;align-items:center;gap:12px;padding:14px;background:var(--card2);border-radius:14px;margin-bottom:10px}
-  .dev .di{width:42px;height:42px;border-radius:12px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px}
+  .empty{text-align:center;color:var(--sub);padding:38px 0;font-size:14px}
+  .avatar{width:60px;height:60px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--yellow));display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#1a1206}
+  .dev{display:flex;align-items:center;gap:12px;padding:13px;background:var(--card2);border-radius:14px;margin-bottom:10px}
+  .dev .di{width:40px;height:40px;border-radius:12px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px}
+  .days-pick{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .days-pick span{padding:8px 10px;border-radius:10px;background:var(--card2);font-size:13px;cursor:pointer;border:2px solid transparent}
+  .days-pick span.on{background:var(--accent);color:#1a1206;border-color:var(--accent)}
+  .wx-authorize{text-align:center;padding:10px 0}
+  .wx-authorize .wx-logo{width:56px;height:56px;border-radius:16px;background:#07C160;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px}
 </style>
 </head>
 <body>
@@ -165,45 +183,51 @@
 
     <!-- login -->
     <form id="form-login" class="form" onsubmit="return doLogin(event)" autocomplete="off">
-      <div class="field" id="f-l-email">
-        <label>邮箱</label>
-        <input id="l-email" type="email" placeholder="you@example.com" />
-        <div class="msg"></div>
+      <div class="auth-methods">
+        <button type="button" id="lm-email" class="on" onclick="setLoginMethod('email')">邮箱</button>
+        <button type="button" id="lm-phone" onclick="setLoginMethod('phone')">手机</button>
+        <button type="button" id="lm-wechat" onclick="setLoginMethod('wechat')">微信</button>
       </div>
-      <div class="field" id="f-l-pwd">
-        <label>密码</label>
-        <input id="l-pwd" type="password" placeholder="请输入密码" />
-        <div class="msg"></div>
+
+      <!-- email -->
+      <div id="login-email">
+        <div class="field" id="f-l-email"><label>邮箱</label><input id="l-email" type="email" placeholder="you@example.com" /><div class="msg"></div></div>
+        <div class="field" id="f-l-pwd"><label>密码</label><input id="l-pwd" type="password" placeholder="请输入密码" /><div class="msg"></div></div>
+        <label class="row" style="font-size:13px;color:var(--sub);gap:8px;cursor:pointer"><input type="checkbox" id="l-remember" checked style="width:16px;height:16px;accent-color:var(--accent)" /> 记住我（7 天内自动登录）</label>
       </div>
-      <label class="row" style="font-size:13px;color:var(--sub);gap:8px;cursor:pointer">
-        <input type="checkbox" id="l-remember" checked style="width:16px;height:16px;accent-color:var(--accent)" /> 记住我（7 天内自动登录）
-      </label>
-      <button class="btn" type="submit">登 录</button>
+
+      <!-- phone -->
+      <div id="login-phone" class="hidden">
+        <div class="field" id="f-p-phone"><label>手机号</label><input id="p-phone" type="tel" inputmode="numeric" maxlength="11" placeholder="11 位手机号" /><div class="msg"></div></div>
+        <div class="field" id="f-p-code"><label>短信验证码</label>
+          <div class="code-row">
+            <input id="p-code" type="tel" inputmode="numeric" maxlength="6" placeholder="6 位验证码" />
+            <button type="button" class="code-btn" id="p-send" onclick="sendSms()">获取验证码</button>
+          </div>
+          <div class="msg"></div>
+        </div>
+      </div>
+
+      <!-- wechat -->
+      <div id="login-wechat" class="hidden">
+        <div class="wx-authorize">
+          <div class="wx-logo">💬</div>
+          <div style="font-weight:600">使用微信账号登录</div>
+          <div class="muted" style="margin-top:6px;font-size:12px">将使用你的微信昵称与头像（演示模式，未接入真实微信开放平台）</div>
+          <button class="btn wx" style="margin-top:14px;width:100%" onclick="wechatLogin()">微信登录</button>
+        </div>
+      </div>
+
+      <button class="btn" type="submit" id="login-submit">登 录</button>
       <div class="hint">还没有账号？<a onclick="authTab('register')">立即注册</a></div>
     </form>
 
     <!-- register -->
     <form id="form-register" class="form hidden" onsubmit="return doRegister(event)" autocomplete="off">
-      <div class="field" id="f-r-name">
-        <label>昵称</label>
-        <input id="r-name" type="text" placeholder="2-20 个字符" />
-        <div class="msg"></div>
-      </div>
-      <div class="field" id="f-r-email">
-        <label>邮箱</label>
-        <input id="r-email" type="email" placeholder="you@example.com" />
-        <div class="msg"></div>
-      </div>
-      <div class="field" id="f-r-pwd">
-        <label>密码</label>
-        <input id="r-pwd" type="password" placeholder="至少 8 位，含字母和数字" />
-        <div class="msg"></div>
-      </div>
-      <div class="field" id="f-r-pwd2">
-        <label>确认密码</label>
-        <input id="r-pwd2" type="password" placeholder="再次输入密码" />
-        <div class="msg"></div>
-      </div>
+      <div class="field" id="f-r-name"><label>昵称</label><input id="r-name" type="text" placeholder="2-20 个字符" /><div class="msg"></div></div>
+      <div class="field" id="f-r-email"><label>邮箱</label><input id="r-email" type="email" placeholder="you@example.com" /><div class="msg"></div></div>
+      <div class="field" id="f-r-pwd"><label>密码</label><input id="r-pwd" type="password" placeholder="至少 8 位，含字母和数字" /><div class="msg"></div></div>
+      <div class="field" id="f-r-pwd2"><label>确认密码</label><input id="r-pwd2" type="password" placeholder="再次输入密码" /><div class="msg"></div></div>
       <button class="btn" type="submit">注 册</button>
       <div class="hint">已有账号？<a onclick="authTab('login')">去登录</a></div>
     </form>
@@ -212,10 +236,7 @@
   <!-- ============ MAIN ============ -->
   <div id="main" class="hidden" style="flex:1;display:flex;flex-direction:column;min-height:0">
     <div id="topbar">
-      <div>
-        <div class="tb-title" id="tb-title">首页</div>
-        <div class="tb-sub" id="tb-sub"></div>
-      </div>
+      <div><div class="tb-title" id="tb-title">首页</div><div class="tb-sub" id="tb-sub"></div></div>
       <div class="tb-icon" onclick="openSettings()">⚙️</div>
     </div>
 
@@ -228,15 +249,12 @@
           <div class="stat"><div class="k">今日时长</div><div class="v"><span id="h-time">0:00</span></div></div>
           <div class="stat"><div class="k">今日消耗</div><div class="v"><span id="h-cal">0</span><span class="u">kcal</span></div></div>
         </div>
-
         <div class="card">
           <div class="row"><div style="font-weight:700">本周里程</div><div class="muted" id="h-week-total">0.00 km</div></div>
           <div class="week" id="week-chart"></div>
         </div>
-
         <button class="bigbtn" onclick="goRun()">🏁 开始跑步</button>
-
-        <div class="card tap" onclick="openWatch()" style="margin-top:14px">
+        <div class="card tap" onclick="openWatch()" style="margin-top:12px">
           <div class="row">
             <div class="row" style="gap:12px">
               <div class="ic" style="width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px">⌚</div>
@@ -245,8 +263,7 @@
             <div class="go">›</div>
           </div>
         </div>
-
-        <div style="font-weight:700;margin:6px 4px 4px">推荐路线</div>
+        <div style="font-weight:700;margin:4px 4px 4px">推荐路线</div>
         <div id="route-list"></div>
       </section>
 
@@ -254,12 +271,14 @@
       <section id="screen-run" class="view"></section>
 
       <!-- HISTORY -->
-      <section id="screen-history" class="view">
-        <div id="history-list"></div>
-      </section>
+      <section id="screen-history" class="view"><div id="history-list"></div></section>
 
       <!-- PLANS -->
       <section id="screen-plans" class="view">
+        <div class="row" style="margin-bottom:12px;gap:10px">
+          <button class="btn ghost" style="flex:1;padding:12px;font-size:14px" onclick="openPlanEditor()">＋ 新建计划</button>
+          <button class="btn ghost" style="flex:1;padding:12px;font-size:14px" onclick="openImport()">↓ 导入计划</button>
+        </div>
         <div class="card">
           <div class="row"><div style="font-weight:700">训练进度</div><div class="accent" id="plan-pct">0%</div></div>
           <div class="progress"><i id="plan-bar" style="width:0%"></i></div>
@@ -275,7 +294,7 @@
             <div><div id="p-name" style="font-size:18px;font-weight:700"></div><div class="muted" id="p-email"></div></div>
           </div>
         </div>
-        <div class="stat-grid" style="margin-bottom:14px">
+        <div class="stat-grid" style="margin-bottom:12px">
           <div class="stat"><div class="k">累计跑步</div><div class="v"><span id="p-runs">0</span><span class="u">次</span></div></div>
           <div class="stat"><div class="k">累计距离</div><div class="v"><span id="p-dist">0</span><span class="u" id="p-dist-u">km</span></div></div>
           <div class="stat"><div class="k">累计时长</div><div class="v" id="p-time">0:00</div></div>
@@ -305,20 +324,20 @@
 <script>
 "use strict";
 /* ============ storage ============ */
-var PREFIX = "pr_";
-function store(k, v){ try{ localStorage.setItem(PREFIX+k, typeof v==="string"?v:JSON.stringify(v)); }catch(e){ mem[k]=v; } }
-function getStore(k, def){ try{ var s=localStorage.getItem(PREFIX+k); return s==null?def:JSON.parse(s); }catch(e){ return (k in mem)?mem[k]:def; } }
-var mem = {};
-function cyrb53(str, seed){ seed=seed||0; var h1=0xdeadbeef^seed,h2=0x41c6ce57^seed; for(var i=0,ch; i<str.length; i++){ ch=str.charCodeAt(i); h1=Math.imul(h1^ch,2654435761); h2=Math.imul(h2^ch,1597334677);} h1=Math.imul(h1^(h1>>>16),2246822507); h1^=Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507); h2^=Math.imul(h1^(h1>>>13),3266489909); return (h2>>>0).toString(16)+(h1>>>0).toString(16);}
+var PREFIX="pr_";
+var mem={};
+function store(k,v){ try{ localStorage.setItem(PREFIX+k, typeof v==="string"?v:JSON.stringify(v)); }catch(e){ mem[k]=v; } }
+function getStore(k,def){ try{ var s=localStorage.getItem(PREFIX+k); return s==null?def:JSON.parse(s); }catch(e){ return (k in mem)?mem[k]:def; } }
+function cyrb53(str,seed){ seed=seed||0; var h1=0xdeadbeef^seed,h2=0x41c6ce57^seed; for(var i=0,ch; i<str.length; i++){ ch=str.charCodeAt(i); h1=Math.imul(h1^ch,2654435761); h2=Math.imul(h2^ch,1597334677);} h1=Math.imul(h1^(h1>>>16),2246822507); h1^=Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507); h2^=Math.imul(h1^(h1>>>13),3266489909); return (h2>>>0).toString(16)+(h1>>>0).toString(16);}
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
 
 /* ============ data ============ */
 function seedIfEmpty(){
   if(getStore("plans",null)===null){
     store("plans",[
-      {id:uid(),title:"新手 5K 计划",desc:"每周 3 次，循序渐进跑到 5 公里",done:false},
-      {id:uid(),title:"减脂燃脂计划",desc:"慢跑结合间歇，提升代谢效率",done:false},
-      {id:uid(),title:"半马备战",desc:"12 周系统训练，冲击 21.1 KM",done:false}
+      {id:uid(),title:"新手 5K 计划",desc:"每周 3 次，循序渐进跑到 5 公里",targetKm:5,weeks:4,days:[1,3,5],done:false,source:"seed"},
+      {id:uid(),title:"减脂燃脂计划",desc:"慢跑结合间歇，提升代谢效率",targetKm:4,weeks:6,days:[2,4,6],done:false,source:"seed"},
+      {id:uid(),title:"半马备战",desc:"12 周系统训练，冲击 21.1 KM",targetKm:21.1,weeks:12,days:[1,3,5,6],done:false,source:"seed"}
     ]);
   }
   if(getStore("routes",null)===null){
@@ -338,25 +357,30 @@ function currentUser(){
   var s=getStore("session",null);
   if(!s) return null;
   if(s.expiresAt < Date.now()){ store("session",null); return null; }
-  var u=getUsers().find(function(x){return x.id===s.userId;});
-  return u||null;
+  return getUsers().find(function(x){return x.id===s.userId;}) || null;
 }
-function setSession(userId, remember){
-  var exp = Date.now() + (remember?7:1)*86400000;
-  store("session",{userId:userId, token:uid(), expiresAt:exp});
-}
+function setSession(userId,remember){ store("session",{userId:userId, token:uid(), expiresAt:Date.now()+(remember?7:1)*86400000}); }
 function authTab(t){
   document.getElementById("form-login").classList.toggle("hidden", t!=="login");
   document.getElementById("form-register").classList.toggle("hidden", t!=="register");
   document.getElementById("tab-login").classList.toggle("on", t==="login");
   document.getElementById("tab-register").classList.toggle("on", t==="register");
+  if(t==="login") setLoginMethod(loginMethod);
 }
-function setErr(fieldId, msg){
-  var f=document.getElementById(fieldId); if(!f) return;
-  f.classList.toggle("err", !!msg);
-  var m=f.querySelector(".msg"); if(m) m.textContent = msg||"";
+var loginMethod="email";
+function setLoginMethod(m){
+  loginMethod=m;
+  document.getElementById("lm-email").classList.toggle("on", m==="email");
+  document.getElementById("lm-phone").classList.toggle("on", m==="phone");
+  document.getElementById("lm-wechat").classList.toggle("on", m==="wechat");
+  document.getElementById("login-email").classList.toggle("hidden", m!=="email");
+  document.getElementById("login-phone").classList.toggle("hidden", m!=="phone");
+  document.getElementById("login-wechat").classList.toggle("hidden", m!=="wechat");
+  document.getElementById("login-submit").classList.toggle("hidden", m==="wechat");
 }
+function setErr(fieldId,msg){ var f=document.getElementById(fieldId); if(!f) return; f.classList.toggle("err",!!msg); var m=f.querySelector(".msg"); if(m) m.textContent=msg||""; }
 function validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function validPhone(p){ return /^1[3-9]\d{9}$/.test(p); }
 
 function doRegister(ev){
   ev.preventDefault();
@@ -371,40 +395,89 @@ function doRegister(ev){
   if(pwd!==pwd2){ setErr("f-r-pwd2","两次输入的密码不一致"); ok=false; } else setErr("f-r-pwd2","");
   if(!ok) return false;
   var users=getUsers();
-  if(users.some(function(u){return u.email.toLowerCase()===email.toLowerCase();})){
-    setErr("f-r-email","该邮箱已被注册"); return false;
-  }
-  var user={id:uid(),name:name,email:email,pw:cyrb53(pwd),createdAt:Date.now()};
-  users.push(user); saveUsers(users);
-  setSession(user.id, true);
-  toast("注册成功，欢迎加入 PaceRun！");
-  enterApp();
-  return false;
+  if(users.some(function(u){return u.email && u.email.toLowerCase()===email.toLowerCase();})){ setErr("f-r-email","该邮箱已被注册"); return false; }
+  var user={id:uid(),name:name,email:email,pw:cyrb53(pwd),provider:"email",createdAt:Date.now()};
+  users.push(user); saveUsers(users); setSession(user.id,true);
+  toast("注册成功，欢迎加入 PaceRun！"); enterApp(); return false;
 }
 function doLogin(ev){
   ev.preventDefault();
+  if(loginMethod==="email") return loginByEmail();
+  if(loginMethod==="phone") return loginByPhone();
+  return false;
+}
+function loginByEmail(){
   var email=document.getElementById("l-email").value.trim();
   var pwd=document.getElementById("l-pwd").value;
   var ok=true;
   if(!validEmail(email)){ setErr("f-l-email","请输入有效的邮箱地址"); ok=false; } else setErr("f-l-email","");
   if(pwd.length===0){ setErr("f-l-pwd","请输入密码"); ok=false; } else setErr("f-l-pwd","");
   if(!ok) return false;
-  var user=getUsers().find(function(u){return u.email.toLowerCase()===email.toLowerCase();});
+  var user=getUsers().find(function(u){return u.email && u.email.toLowerCase()===email.toLowerCase();});
   if(!user||user.pw!==cyrb53(pwd)){ setErr("f-l-pwd","邮箱或密码错误"); return false; }
-  var remember=document.getElementById("l-remember").checked;
-  setSession(user.id, remember);
-  toast("登录成功");
-  enterApp();
-  return false;
+  setSession(user.id, document.getElementById("l-remember").checked);
+  toast("登录成功"); enterApp(); return false;
 }
-function doLogout(){ store("session",null); location.reload(); }
+/* ---- phone login ---- */
+var sms=null;
+function sendSms(){
+  var phone=document.getElementById("p-phone").value.trim();
+  if(!validPhone(phone)){ setErr("f-p-phone","请输入有效的 11 位手机号"); return; }
+  setErr("f-p-phone","");
+  var code=String(Math.floor(100000+Math.random()*900000));
+  sms={phone:phone, code:code, expires:Date.now()+300000};
+  toast("验证码已发送（演示）："+code);
+  var btn=document.getElementById("p-send"); btn.disabled=true;
+  var left=60; btn.textContent=left+"s";
+  var iv=setInterval(function(){ left--; if(left<=0){ clearInterval(iv); btn.disabled=false; btn.textContent="重新获取"; } else btn.textContent=left+"s"; },1000);
+}
+function loginByPhone(){
+  var phone=document.getElementById("p-phone").value.trim();
+  var code=document.getElementById("p-code").value.trim();
+  var ok=true;
+  if(!validPhone(phone)){ setErr("f-p-phone","请输入有效的 11 位手机号"); ok=false; } else setErr("f-p-phone","");
+  if(!sms||sms.phone!==phone){ setErr("f-p-code","请先获取验证码"); ok=false; }
+  else if(sms.expires<Date.now()){ setErr("f-p-code","验证码已过期，请重新获取"); ok=false; }
+  else if(sms.code!==code){ setErr("f-p-code","验证码不正确"); ok=false; }
+  else setErr("f-p-code","");
+  if(!ok) return false;
+  var users=getUsers();
+  var user=users.find(function(u){return u.phone===phone;});
+  if(!user){ user={id:uid(),name:"手机用户"+phone.slice(-4),phone:phone,provider:"phone",createdAt:Date.now()}; users.push(user); saveUsers(users); }
+  sms=null;
+  setSession(user.id,true);
+  toast("登录成功"); enterApp(); return false;
+}
+/* ---- wechat login (demo flow; real deployment needs WeChat Open Platform appId + backend) ---- */
+function wechatLogin(){
+  openModal(
+    '<h3>微信授权 <button class="close" onclick="closeModal()">×</button></h3>'+
+    '<div class="wx-authorize"><div class="wx-logo">💬</div>'+
+    '<div style="font-weight:700">PaceRun 申请使用以下信息</div>'+
+    '<div class="muted" style="margin:8px 0">昵称、头像</div>'+
+    '<div class="muted" style="font-size:11px;margin-bottom:14px">演示模式：未接入真实微信开放平台，将模拟授权返回</div>'+
+    '<button class="btn wx" onclick="wechatConfirm()">确认登录</button>'+
+    '<button class="btn ghost" style="margin-top:10px" onclick="closeModal()">取消</button></div>'
+  );
+}
+function wechatConfirm(){
+  var openid="wx_"+uid();
+  var users=getUsers();
+  var user=users.find(function(u){return u.wechat===openid;});
+  if(!user){
+    user={id:uid(),name:"微信用户"+Math.floor(1000+Math.random()*9000),wechat:openid,provider:"wechat",createdAt:Date.now()};
+    users.push(user); saveUsers(users);
+  }
+  setSession(user.id,true);
+  closeModal(); toast("微信登录成功"); enterApp();
+}
+function doLogout(){ store("session",null); WatchSync.disconnect(); location.reload(); }
 
 /* ============ app enter / nav ============ */
 function enterApp(){
   document.getElementById("screen-auth").classList.remove("active");
   document.getElementById("main").classList.remove("hidden");
-  applyAccent();
-  navTo("home");
+  applyAccent(); navTo("home");
 }
 function navTo(target){
   var titles={home:["首页",""],run:["跑步",""],history:["历史记录",""],plans:["训练计划",""],profile:["我的",""]};
@@ -422,28 +495,15 @@ function navTo(target){
 function goRun(){ navTo("run"); }
 
 /* ============ units / format ============ */
-function kmToDisp(km){
-  var s=getStore("settings",{});
-  if(s.units==="mi") return (km*0.621371).toFixed(2);
-  return km.toFixed(2);
-}
+function kmToDisp(km){ return getStore("settings",{}).units==="mi"?(km*0.621371).toFixed(2):km.toFixed(2); }
 function unitSuffix(){ return getStore("settings",{}).units==="mi"?"mi":"km"; }
-function fmtTime(sec){
-  sec=Math.floor(sec); var h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
-  if(h>0) return h+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
-  return m+":"+String(s).padStart(2,"0");
-}
-function fmtPace(secPerKm){
-  if(!isFinite(secPerKm)||secPerKm<=0) return "--'--";
-  var m=Math.floor(secPerKm/60), s=Math.round(secPerKm%60);
-  return m+"'"+(s<10?"0":"")+s+'"';
-}
+function fmtTime(sec){ sec=Math.floor(sec); var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60; if(h>0) return h+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0"); return m+":"+String(s).padStart(2,"0"); }
+function fmtPace(secPerKm){ if(!isFinite(secPerKm)||secPerKm<=0) return "--'--"; var m=Math.floor(secPerKm/60),s=Math.round(secPerKm%60); return m+"'"+(s<10?"0":"")+s+'"'; }
 
 /* ============ HOME ============ */
 function renderHome(){
   var runs=getStore("runs",[]);
-  var today=new Date(); today.setHours(0,0,0,0);
-  var td=today.getTime();
+  var today=new Date(); today.setHours(0,0,0,0); var td=today.getTime();
   var toRuns=runs.filter(function(r){return new Date(r.date).setHours(0,0,0,0)===td;});
   var dist=toRuns.reduce(function(a,r){return a+r.distanceKm;},0);
   var time=toRuns.reduce(function(a,r){return a+r.durationSec;},0);
@@ -454,101 +514,74 @@ function renderHome(){
   document.getElementById("h-time").textContent=fmtTime(time);
   document.getElementById("h-cal").textContent=Math.round(cal);
 
-  // week chart
   var days=["日","一","二","三","四","五","六"];
-  var now=new Date(); now.setHours(0,0,0,0);
-  var data=[]; var max=0;
-  for(var i=6;i>=0;i--){
-    var d=new Date(now); d.setDate(now.getDate()-i);
-    var ds=d.getTime();
+  var now=new Date(); now.setHours(0,0,0,0); var data=[]; var max=0;
+  for(var i=6;i>=0;i--){ var d=new Date(now); d.setDate(now.getDate()-i); var ds=d.getTime();
     var sum=runs.filter(function(r){return new Date(r.date).setHours(0,0,0,0)===ds;}).reduce(function(a,r){return a+r.distanceKm;},0);
-    if(sum>max) max=sum;
-    data.push({label:days[d.getDay()], val:sum, today:(i===0)});
-  }
-  var chart=document.getElementById("week-chart"); chart.innerHTML="";
-  var wt=0; data.forEach(function(d){wt+=d.val;});
+    if(sum>max) max=sum; data.push({label:days[d.getDay()],val:sum,today:(i===0)}); }
+  var chart=document.getElementById("week-chart"); chart.innerHTML=""; var wt=0; data.forEach(function(d){wt+=d.val;});
   document.getElementById("h-week-total").textContent=kmToDisp(wt)+" "+unitSuffix();
-  data.forEach(function(d){
-    var day=document.createElement("div"); day.className="day"+(d.today?" today":"");
+  data.forEach(function(d){ var day=document.createElement("div"); day.className="day"+(d.today?" today":"");
     var h=max>0?Math.max(6,Math.round(d.val/max*100)):6;
-    day.innerHTML='<div class="bar"><i style="height:'+h+'%"></i></div><div class="lab">'+d.label+'</div>';
-    chart.appendChild(day);
-  });
+    day.innerHTML='<div class="bar"><i style="height:'+h+'%"></i></div><div class="lab">'+d.label+'</div>'; chart.appendChild(day); });
 
-  // watch state
   var w=getStore("watch",null);
-  document.getElementById("watch-name").textContent = w? w.name : "运动手表";
-  document.getElementById("watch-state").textContent = w? ("已连接 · 电量 "+w.battery+"%") : "未连接";
+  if(w){ var tag=w.real?'<span class="badge real">实时</span>':'<span class="badge demo">模拟</span>';
+    document.getElementById("watch-name").textContent=w.name;
+    document.getElementById("watch-state").innerHTML="已连接 · 电量 "+w.battery+"% "+tag;
+  } else { document.getElementById("watch-name").textContent="运动手表"; document.getElementById("watch-state").textContent="未连接"; }
 
-  // routes
-  var routes=getStore("routes",[]);
-  var rl=document.getElementById("route-list"); rl.innerHTML="";
-  routes.forEach(function(rt){
-    var d=document.createElement("div"); d.className="card tap"; d.onclick=function(){ startRoute(rt); };
-    d.innerHTML='<div class="row"><div class="row" style="gap:12px"><div class="ic" style="width:44px;height:44px;border-radius:13px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px">'+rt.icon+'</div><div><div style="font-weight:600">'+rt.name+'</div><div class="muted">'+rt.dist+' km · '+rt.tag+'</div></div></div><div class="go">›</div></div>';
-    rl.appendChild(d);
-  });
+  var routes=getStore("routes",[]); var rl=document.getElementById("route-list"); rl.innerHTML="";
+  routes.forEach(function(rt){ var d=document.createElement("div"); d.className="card tap"; d.onclick=function(){ startRoute(rt); };
+    d.innerHTML='<div class="row"><div class="row" style="gap:12px"><div class="ic" style="width:44px;height:44px;border-radius:13px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px">'+rt.icon+'</div><div><div style="font-weight:600">'+rt.name+'</div><div class="muted">'+rt.dist+' km · '+rt.tag+'</div></div></div><div class="go">›</div></div>'; rl.appendChild(d); });
 }
-function startRoute(rt){
-  toast("已选择路线："+rt.name);
-  navTo("run");
-}
+function startRoute(rt){ toast("已选择路线："+rt.name); navTo("run"); }
 
 /* ============ RUN ============ */
 var run=null;
+var liveWatch=null;
 function renderRun(){
   var s=document.getElementById("screen-run");
-  if(run && (run.active||run.paused)){
-    drawRunActive();
-  } else {
-    var runs=getStore("runs",[]);
-    var last=runs[runs.length-1];
+  if(run && (run.active||run.paused)){ drawRunActive(); }
+  else {
+    var runs=getStore("runs",[]); var last=runs[runs.length-1];
     s.innerHTML='<div class="run-idle" style="display:flex;flex-direction:column;align-items:center;width:100%">'+
-      '<div class="big">🏃</div>'+
-      '<div class="t">准备开跑</div>'+
+      '<div class="big">🏃</div><div class="t">准备开跑</div>'+
       '<div class="s">'+(last?("上次："+kmToDisp(last.distanceKm)+" "+unitSuffix()+" · "+fmtTime(last.durationSec)):"还没有记录，开始第一次奔跑吧")+'</div>'+
-      '<button class="bigbtn" style="margin-top:10px" onclick="startRun()">🚀 开始跑步</button>'+
-      '</div>';
+      '<button class="bigbtn" style="margin-top:10px" onclick="startRun()">🚀 开始跑步</button></div>';
   }
 }
 function drawRunActive(){
   var s=document.getElementById("screen-run");
   s.innerHTML=
-    '<div class="run-ring" id="run-ring" style="--p:0"><div class="inner">'+
-      '<div class="run-time" id="rt-time">0:00</div>'+
-      '<div class="run-sub" id="rt-state">跑步中</div>'+
-    '</div></div>'+
+    '<div class="run-ring" id="run-ring" style="--p:0"><div class="inner"><div class="run-time" id="rt-time">0:00</div><div class="run-sub" id="rt-state">跑步中</div></div></div>'+
     '<div class="run-stats">'+
       '<div class="run-stat"><div class="v" id="rs-dist">0.00</div><div class="k">距离 '+unitSuffix()+'</div></div>'+
       '<div class="run-stat"><div class="v" id="rs-pace">--\'--</div><div class="k">配速</div></div>'+
       '<div class="run-stat"><div class="v" id="rs-cal">0</div><div class="k">kcal</div></div>'+
     '</div>'+
     '<div class="run-stats" style="margin-top:0">'+
-      '<div class="run-stat"><div class="v" id="rs-hr">--</div><div class="k">心率 bpm</div></div>'+
+      '<div class="run-stat"><div class="v" id="rs-hr">—</div><div class="k">心率 bpm</div></div>'+
       '<div class="run-stat"><div class="v" id="rs-step">0</div><div class="k">步数</div></div>'+
-      '<div class="run-stat"><div class="v" style="font-size:14px" id="rs-watch">未连</div><div class="k">手表</div></div>'+
+      '<div class="run-stat"><div class="v" style="font-size:13px" id="rs-watch">未连</div><div class="k">手表</div></div>'+
     '</div>'+
     '<div class="run-controls">'+
       (run.paused?'<button class="btn green" onclick="resumeRun()">继续</button>':'<button class="btn ghost" onclick="pauseRun()">暂停</button>')+
-      '<button class="btn" onclick="finishRun()">结束</button>'+
-    '</div>';
+      '<button class="btn" onclick="finishRun()">结束</button></div>';
   updateRunUI();
 }
 function startRun(){
-  run={active:true,paused:false,startTs:Date.now(),baseElapsed:0,elapsed:0,distanceKm:0,calories:0,steps:0,hr:120,timer:null};
+  run={active:true,paused:false,startTs:Date.now(),baseElapsed:0,elapsed:0,distanceKm:0,calories:0,steps:0,hr:null,timer:null};
   drawRunActive();
   run.timer=setInterval(tickRun,1000);
 }
 function tickRun(){
   if(!run||run.paused) return;
   run.elapsed=run.baseElapsed+Math.floor((Date.now()-run.startTs)/1000);
-  var inc=(1/360)*(0.8+Math.random()*0.4); // km per sec
-  run.distanceKm+=inc;
+  run.distanceKm+=(1/360)*(0.8+Math.random()*0.4);
   run.calories+=0.13;
   run.steps+=Math.round(2+Math.random()*1.5);
-  var w=getStore("watch",null);
-  if(w){ run.hr=Math.round(125+Math.sin(run.elapsed/8)*18+Math.random()*6); }
-  else { run.hr=Math.round(115+Math.sin(run.elapsed/10)*22+Math.random()*6); }
+  run.hr = (liveWatch && liveWatch.hr)? liveWatch.hr : null;
   updateRunUI();
 }
 function updateRunUI(){
@@ -557,22 +590,20 @@ function updateRunUI(){
   var d=document.getElementById("rs-dist"); if(d) d.textContent=kmToDisp(run.distanceKm);
   var p=document.getElementById("rs-pace"); if(p) p.textContent=fmtPace(run.distanceKm>0?run.elapsed/run.distanceKm:0);
   var c=document.getElementById("rs-cal"); if(c) c.textContent=Math.round(run.calories);
-  var hr=document.getElementById("rs-hr"); if(hr) hr.textContent=run.hr;
+  var hr=document.getElementById("rs-hr"); if(hr) hr.textContent=run.hr?run.hr:"—";
   var st=document.getElementById("rs-step"); if(st) st.textContent=run.steps;
-  var wv=document.getElementById("rs-watch"); var w=getStore("watch",null); if(wv) wv.textContent=w?("⌚"+w.name.slice(0,4)):"未连";
-  var ring=document.getElementById("run-ring"); if(ring){ var prog=Math.min(100, run.elapsed%60/60*100); ring.style.setProperty("--p",prog); }
+  var wv=document.getElementById("rs-watch"); var w=getStore("watch",null); if(wv) wv.textContent=w?(w.real?"实时":"模拟"):"未连";
+  var ring=document.getElementById("run-ring"); if(ring){ ring.style.setProperty("--p",Math.min(100,run.elapsed%60/60*100)); }
 }
 function pauseRun(){ if(!run) return; run.paused=true; run.baseElapsed=run.elapsed; clearInterval(run.timer); drawRunActive(); document.getElementById("rt-state").textContent="已暂停"; }
 function resumeRun(){ if(!run) return; run.paused=false; run.startTs=Date.now(); run.timer=setInterval(tickRun,1000); drawRunActive(); document.getElementById("rt-state").textContent="跑步中"; }
 function finishRun(){
-  if(!run) return;
-  clearInterval(run.timer);
+  if(!run) return; clearInterval(run.timer);
   if(run.distanceKm<0.01){ toast("距离太短，已取消"); run=null; renderRun(); return; }
   var avgPace=run.elapsed/run.distanceKm;
-  var record={id:uid(),date:Date.now(),durationSec:run.elapsed,distanceKm:run.distanceKm,calories:Math.round(run.calories),avgPaceSec:avgPace,steps:run.steps};
+  var record={id:uid(),date:Date.now(),durationSec:run.elapsed,distanceKm:run.distanceKm,calories:Math.round(run.calories),avgPaceSec:avgPace,steps:run.steps,hrPeak:run.hr};
   var runs=getStore("runs",[]); runs.push(record); store("runs",runs);
-  var rec=record;
-  run=null;
+  var rec=record; run=null;
   openModal(
     '<h3>本次跑步完成 <button class="close" onclick="closeModal()">×</button></h3>'+
     '<div class="summary-grid">'+
@@ -580,8 +611,7 @@ function finishRun(){
       '<div class="st"><div class="v">'+fmtTime(rec.durationSec)+'</div><div class="k">时长</div></div>'+
       '<div class="st"><div class="v">'+fmtPace(rec.avgPaceSec)+'</div><div class="k">平均配速</div></div>'+
       '<div class="st"><div class="v">'+rec.calories+'</div><div class="k">kcal</div></div>'+
-    '</div>'+
-    '<button class="btn" onclick="afterFinish()">完成</button>'
+    '</div><button class="btn" onclick="afterFinish()">完成</button>'
   );
 }
 function afterFinish(){ closeModal(); navTo("home"); }
@@ -592,14 +622,12 @@ function renderHistory(){
   var box=document.getElementById("history-list");
   if(runs.length===0){ box.innerHTML='<div class="empty">还没有跑步记录<br>去「跑步」开始第一次记录吧 🏃</div>'; return; }
   box.innerHTML="";
-  runs.forEach(function(r){
-    var d=new Date(r.date);
+  runs.forEach(function(r){ var d=new Date(r.date);
     var dateStr=(d.getMonth()+1)+"月"+d.getDate()+"日 "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
     var item=document.createElement("div"); item.className="card tap"; item.onclick=function(){showRunDetail(r);};
     item.innerHTML='<div class="row"><div class="row" style="gap:14px"><div class="ic">🏃</div><div><div style="font-weight:600">'+kmToDisp(r.distanceKm)+' '+unitSuffix()+'</div><div class="muted">'+dateStr+'</div></div></div>'+
       '<div style="text-align:right"><div class="accent" style="font-weight:700">'+fmtTime(r.durationSec)+'</div><div class="muted">'+fmtPace(r.avgPaceSec)+'/'+unitSuffix()+'</div></div></div>';
-    box.appendChild(item);
-  });
+    box.appendChild(item); });
 }
 function showRunDetail(r){
   var d=new Date(r.date);
@@ -611,16 +639,14 @@ function showRunDetail(r){
       '<div class="st"><div class="v">'+fmtTime(r.durationSec)+'</div><div class="k">时长</div></div>'+
       '<div class="st"><div class="v">'+fmtPace(r.avgPaceSec)+'</div><div class="k">配速</div></div>'+
       '<div class="st"><div class="v">'+r.calories+'</div><div class="k">kcal</div></div>'+
-    '</div>'+
-    '<button class="btn ghost" onclick="deleteRun(\''+r.id+'\')">删除这条记录</button>'
+    '</div><button class="btn ghost" onclick="deleteRun(\''+r.id+'\')">删除这条记录</button>'
   );
 }
-function deleteRun(id){
-  var runs=getStore("runs",[]).filter(function(r){return r.id!==id;});
-  store("runs",runs); closeModal(); renderHistory(); toast("已删除");
-}
+function deleteRun(id){ var runs=getStore("runs",[]).filter(function(r){return r.id!==id;}); store("runs",runs); closeModal(); renderHistory(); toast("已删除"); }
 
-/* ============ PLANS ============ */
+/* ============ PLANS (CRUD + import) ============ */
+var DAY_LABELS=["日","一","二","三","四","五","六"];
+function planSourceLabel(s){ return s==="seed"?"内置":s==="sample"?"示例":s==="import"?"导入":"自定义"; }
 function renderPlans(){
   var plans=getStore("plans",[]);
   var done=plans.filter(function(p){return p.done;}).length;
@@ -628,25 +654,101 @@ function renderPlans(){
   document.getElementById("plan-pct").textContent=pct+"%";
   document.getElementById("plan-bar").style.width=pct+"%";
   var box=document.getElementById("plan-list"); box.innerHTML="";
+  if(plans.length===0){ box.innerHTML='<div class="empty">还没有训练计划<br>点「新建计划」或「导入计划」开始 📋</div>'; return; }
   plans.forEach(function(p){
+    var meta=(p.targetKm?p.targetKm+" km · ":"")+(p.weeks?p.weeks+"周 · ":"")+"每周"+(p.days?p.days.length:0)+"天";
     var item=document.createElement("div"); item.className="card";
-    item.innerHTML='<div class="row"><div style="flex:1"><div style="font-weight:600">'+p.title+'</div><div class="muted" style="margin-top:4px">'+p.desc+'</div></div>'+
-      '<div class="check'+(p.done?" on":"")+'" onclick="togglePlan(\''+p.id+'\')">'+(p.done?"✓":"")+'</div></div>';
+    item.innerHTML='<div class="row"><div style="flex:1"><div style="font-weight:600">'+p.title+'</div>'+
+      '<div class="muted" style="margin-top:4px">'+p.desc+'</div>'+
+      '<div class="plan-meta">'+meta+' · <span class="badge">'+planSourceLabel(p.source)+'</span></div></div>'+
+      '<div style="display:flex;flex-direction:column;gap:8px;align-items:center">'+
+      '<div class="check'+(p.done?" on":"")+'" onclick="togglePlan(\''+p.id+'\')">'+(p.done?"✓":"")+'</div>'+
+      '<div class="row" style="gap:6px"><span class="mini-btn" onclick="openPlanEditor(\''+p.id+'\')">✎</span>'+
+      '<span class="mini-btn" onclick="askDeletePlan(\''+p.id+'\')">🗑</span></div></div></div>';
     box.appendChild(item);
   });
 }
-function togglePlan(id){
+function togglePlan(id){ var plans=getStore("plans",[]).map(function(p){ if(p.id===id) p.done=!p.done; return p; }); store("plans",plans); renderPlans(); }
+function openPlanEditor(id){
+  var p=id?getStore("plans",[]).find(function(x){return x.id===id;}):null;
+  var days=p?p.days.slice():[1,3,5];
+  var html='<h3>'+(p?"编辑计划":"新建计划")+' <button class="close" onclick="closeModal()">×</button></h3>';
+  html+='<div class="field"><label>计划名称</label><input id="pl-title" type="text" value="'+(p?p.title:"")+'" maxlength="30" placeholder="例如：10K 进阶" /></div>';
+  html+='<div class="field"><label>描述</label><input id="pl-desc" type="text" value="'+(p?p.desc:"")+'" maxlength="60" placeholder="一句话说明目标" /></div>';
+  html+='<div class="row" style="gap:10px"><div class="field" style="flex:1"><label>目标里程(km)</label><input id="pl-km" type="number" min="0" step="0.1" value="'+(p?p.targetKm:"5")+'" /></div>'+
+    '<div class="field" style="flex:1"><label>周期(周)</label><input id="pl-weeks" type="number" min="1" step="1" value="'+(p?p.weeks:"4")+'" /></div></div>';
+  html+='<div class="field"><label>每周训练日</label><div class="days-pick" id="pl-days">';
+  for(var i=0;i<7;i++){ html+='<span class="'+(days.indexOf(i)>=0?"on":"")+'" data-d="'+i+'" onclick="toggleDayPick(this,'+i+')">'+DAY_LABELS[i]+'</span>'; }
+  html+='</div><input type="hidden" id="pl-days-val" value="'+days.join(",")+'" /></div>';
+  html+='<button class="btn" onclick="savePlan(\''+(id||"")+'\')">保存</button>';
+  openModal(html);
+}
+function toggleDayPick(el,d){ el.classList.toggle("on"); var cur=document.getElementById("pl-days-val").value?document.getElementById("pl-days-val").value.split(","):[]; var i=cur.indexOf(String(d)); if(i>=0) cur.splice(i,1); else cur.push(String(d)); document.getElementById("pl-days-val").value=cur.join(","); }
+function savePlan(id){
+  var title=document.getElementById("pl-title").value.trim();
+  if(title.length<1){ toast("请填写计划名称"); return; }
+  var desc=document.getElementById("pl-desc").value.trim();
+  var km=parseFloat(document.getElementById("pl-km").value)||0;
+  var weeks=parseInt(document.getElementById("pl-weeks").value,10)||1;
+  var days=document.getElementById("pl-days-val").value?document.getElementById("pl-days-val").value.split(",").map(Number):[];
   var plans=getStore("plans",[]);
-  plans=plans.map(function(p){ if(p.id===id) p.done=!p.done; return p; });
-  store("plans",plans); renderPlans();
+  if(id){ plans=plans.map(function(p){ if(p.id===id){ p.title=title;p.desc=desc;p.targetKm=km;p.weeks=weeks;p.days=days; } return p; }); }
+  else { plans.push({id:uid(),title:title,desc:desc,targetKm:km,weeks:weeks,days:days,done:false,source:"custom"}); }
+  store("plans",plans); closeModal(); renderPlans(); toast("已保存");
+}
+function askDeletePlan(id){
+  openModal('<h3>删除计划 <button class="close" onclick="closeModal()">×</button></h3>'+
+    '<div class="muted" style="margin:6px 0 16px">确定删除这条训练计划？此操作不可恢复。</div>'+
+    '<div class="run-controls"><button class="btn ghost" onclick="closeModal()">取消</button>'+
+    '<button class="btn" style="background:var(--red);color:#fff" onclick="deletePlan(\''+id+'\')">确认删除</button></div>');
+}
+function deletePlan(id){ var plans=getStore("plans",[]).filter(function(p){return p.id!==id;}); store("plans",plans); closeModal(); renderPlans(); toast("已删除"); }
+function openImport(){
+  var html='<h3>导入训练计划 <button class="close" onclick="closeModal()">×</button></h3>';
+  html+='<div class="muted" style="margin-bottom:8px">支持粘贴 JSON（单个对象或数组），或从示例库一键导入。</div>';
+  html+='<div class="field"><label>粘贴计划 JSON</label><textarea id="imp-json" placeholder=\'[{"title":"晨跑30分","desc":"轻松跑","targetKm":3,"weeks":4,"days":[1,2,3,4,5,6,0]}]\'></textarea></div>';
+  html+='<button class="btn" onclick="importFromJson()">导入 JSON</button>';
+  html+='<div class="divider">或</div>';
+  html+='<button class="btn ghost" onclick="importSample()">从示例库导入</button>';
+  html+='<div class="field" style="margin-top:12px"><label>从链接导入（需可跨域访问的 JSON）</label><input id="imp-url" type="url" placeholder="https://example.com/plan.json" /></div>';
+  html+='<button class="btn ghost" onclick="importFromUrl()">从链接导入</button>';
+  openModal(html);
+}
+function normalizePlan(o){ return {id:uid(),title:String(o.title||"未命名计划"),desc:String(o.desc||""),targetKm:parseFloat(o.targetKm)||0,weeks:parseInt(o.weeks,10)||1,days:Array.isArray(o.days)?o.days.map(Number):[1,3,5],done:false,source:"import"}; }
+function importFromJson(){
+  var txt=document.getElementById("imp-json").value.trim();
+  if(!txt){ toast("请先粘贴 JSON"); return; }
+  var data; try{ data=JSON.parse(txt); }catch(e){ toast("JSON 格式错误"); return; }
+  var arr=Array.isArray(data)?data:[data];
+  if(!arr.length){ toast("没有可导入的计划"); return; }
+  var plans=getStore("plans",[]); arr.forEach(function(o){ plans.push(normalizePlan(o)); });
+  store("plans",plans); closeModal(); renderPlans(); toast("已导入 "+arr.length+" 条计划");
+}
+function importSample(){
+  var samples=[
+    {title:"马拉松 16 周进阶",desc:"从 5K 到全马系统训练",targetKm:42.2,weeks:16,days:[2,4,6]},
+    {title:"燃脂塑形 8 周",desc:"间歇跑+力量，高效减脂",targetKm:5,weeks:8,days:[1,3,5]},
+    {title:"晨跑习惯养成",desc:"每天 30 分钟轻松跑",targetKm:3,weeks:4,days:[0,1,2,3,4,5,6]}
+  ];
+  var plans=getStore("plans",[]); samples.forEach(function(o){ var p=normalizePlan(o); p.source="sample"; plans.push(p); });
+  store("plans",plans); closeModal(); renderPlans(); toast("已导入示例计划");
+}
+function importFromUrl(){
+  var url=document.getElementById("imp-url").value.trim();
+  if(!url){ toast("请输入链接"); return; }
+  toast("正在获取…");
+  fetch(url).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); }).then(function(data){
+    var arr=Array.isArray(data)?data:[data]; var plans=getStore("plans",[]);
+    arr.forEach(function(o){ plans.push(normalizePlan(o)); }); store("plans",plans); closeModal(); renderPlans(); toast("已导入 "+arr.length+" 条计划");
+  }).catch(function(e){ toast("链接获取失败："+e.message+"（可能被 CORS 限制，建议改用粘贴 JSON）"); });
 }
 
 /* ============ PROFILE ============ */
 function renderProfile(){
   var u=currentUser(); if(!u) return;
-  document.getElementById("p-avatar").textContent=u.name.slice(0,1).toUpperCase();
-  document.getElementById("p-name").textContent=u.name;
-  document.getElementById("p-email").textContent=u.email;
+  document.getElementById("p-avatar").textContent=(u.name||"P").slice(0,1).toUpperCase();
+  document.getElementById("p-name").textContent=u.name+(u.provider?(" · "+({email:"邮箱",phone:"手机",wechat:"微信"}[u.provider]||"")):"");
+  document.getElementById("p-email").textContent=u.email||u.phone||(u.wechat?"微信账号":"未绑定");
   document.getElementById("p-dist-u").textContent=unitSuffix();
   var runs=getStore("runs",[]);
   var dist=runs.reduce(function(a,r){return a+r.distanceKm;},0);
@@ -659,51 +761,72 @@ function renderProfile(){
 }
 function editName(){
   var u=currentUser(); if(!u) return;
-  openModal(
-    '<h3>修改昵称 <button class="close" onclick="closeModal()">×</button></h3>'+
-    '<div class="field"><input id="new-name" type="text" value="'+u.name+'" maxlength="20" /></div>'+
-    '<button class="btn" onclick="saveName()">保存</button>'
-  );
+  openModal('<h3>修改昵称 <button class="close" onclick="closeModal()">×</button></h3>'+
+    '<div class="field"><input id="new-name" type="text" value="'+u.name+'" maxlength="20" /></div><button class="btn" onclick="saveName()">保存</button>');
 }
 function saveName(){
   var v=document.getElementById("new-name").value.trim();
   if(v.length<2){ toast("昵称至少 2 个字符"); return; }
-  var users=getUsers().map(function(x){ if(x.id===currentUser().id) x.name=v; return x; });
+  var u=currentUser(); var users=getUsers().map(function(x){ if(x.id===u.id) x.name=v; return x; });
   saveUsers(users); closeModal(); renderProfile(); toast("昵称已更新");
 }
 
-/* ============ WATCH ============ */
+/* ============ WATCH — real sync interface ============ */
 var DEVICES=[
-  {id:"d1",name:"PaceRun Watch S1",icon:"⌚"},
-  {id:"d2",name:"PaceRun Band 2",icon:"📿"},
-  {id:"d3",name:"GT Runner Pro",icon:"🕒"}
+  {id:"d1",name:"PaceRun Demo Watch",icon:"⌚",real:false},
+  {id:"d2",name:"PaceRun Band 2 (演示)",icon:"📿",real:false},
+  {id:"ble",name:"真实蓝牙设备 (BLE)",icon:"📡",real:true}
 ];
+var WatchSync={
+  device:null, timer:null,
+  connect:function(device,cb){
+    this.device=device; var self=this;
+    if(device.real){
+      if(!("bluetooth" in navigator)){ cb({error:"当前 WebView 不支持 Web Bluetooth，无法连接真实设备（正式版需在原生层集成蓝牙）"}); return; }
+      navigator.bluetooth.requestDevice({filters:[{services:["heart_rate"]}]})
+        .then(function(dev){ return dev.gatt.connect(); })
+        .then(function(srv){ return srv.getPrimaryService("heart_rate"); })
+        .then(function(svc){ return svc.getCharacteristic("heart_rate_measurement"); })
+        .then(function(ch){ ch.startNotifications(); ch.oncharacteristicvaluechanged=function(ev){ var v=ev.target.value; var hr=v.getUint8(1); liveWatch={hr:hr,source:"real"}; cb({hr:hr,source:"real"}); }; cb({connected:true}); })
+        .catch(function(e){ cb({error:"蓝牙连接失败："+e.message}); });
+    } else {
+      this.timer=setInterval(function(){
+        var hr=Math.round(118+Math.sin(Date.now()/9000)*22+Math.random()*6);
+        liveWatch={hr:hr,source:"demo"}; cb({hr:hr,source:"demo"});
+      },1000);
+    }
+  },
+  disconnect:function(){ if(this.timer){ clearInterval(this.timer); this.timer=null; } this.device=null; liveWatch=null; }
+};
 function openWatch(){
   var w=getStore("watch",null);
   var html='<h3>我的设备 <button class="close" onclick="closeModal()">×</button></h3>';
   if(w){
-    var wdev=DEVICES.find(function(d){return d.name===w.name;});
-    html+='<div class="dev"><div class="di">'+(wdev?wdev.icon:"⌚")+'</div><div style="flex:1"><div style="font-weight:600">'+w.name+'</div><div class="muted">电量 '+w.battery+'% · 已同步</div></div></div>';
+    var tag=w.real?'<span class="badge real">实时</span>':'<span class="badge demo">模拟数据</span>';
+    var dev=DEVICES.find(function(d){return d.name===w.name;});
+    html+='<div class="dev"><div class="di">'+(dev?dev.icon:"⌚")+'</div><div style="flex:1"><div style="font-weight:600">'+w.name+' '+tag+'</div><div class="muted">电量 '+w.battery+'% · 已同步</div></div></div>';
     html+='<button class="btn ghost" onclick="disconnectWatch()">断开连接</button>';
   } else {
-    html+='<div class="muted" style="margin-bottom:10px">正在扫描附近设备…</div>';
+    html+='<div class="muted" style="margin-bottom:10px">选择一个数据源连接。标注「模拟数据」为本地演示流；「真实蓝牙设备」会尝试通过 Web Bluetooth 读取真实心率（当前 WebView 通常不支持，将明确报错）。</div>';
     DEVICES.forEach(function(d){
-      html+='<div class="dev"><div class="di">'+d.icon+'</div><div style="flex:1"><div style="font-weight:600">'+d.name+'</div><div class="muted">点击连接</div></div><button class="btn green" style="padding:10px 16px;font-size:14px" onclick="connectWatch(\''+d.id+'\')">连接</button></div>';
+      var tag=d.real?'<span class="badge real">实时</span>':'<span class="badge demo">模拟数据</span>';
+      html+='<div class="dev"><div class="di">'+d.icon+'</div><div style="flex:1"><div style="font-weight:600">'+d.name+' '+tag+'</div><div class="muted">'+(d.real?"通过蓝牙读取真实心率":"本地生成演示心率")+'</div></div><button class="btn green" style="padding:10px 14px;font-size:13px" onclick="connectWatch(\''+d.id+'\')">连接</button></div>';
     });
   }
   openModal(html);
 }
 function connectWatch(id){
   var d=DEVICES.find(function(x){return x.id===id;});
-  store("watch",{name:d.name,battery:60+Math.floor(Math.random()*40),connectedAt:Date.now()});
-  toast("已连接 "+d.name);
-  openWatch();
-  if(document.getElementById("screen-home").classList.contains("active")) renderHome();
+  WatchSync.disconnect();
+  WatchSync.connect(d, function(res){
+    if(res.error){ toast(res.error); return; }
+    store("watch",{name:d.name,real:d.real,battery:d.real?100:(60+Math.floor(Math.random()*40)),connectedAt:Date.now()});
+    toast("已连接 "+d.name+(d.real?"（实时）":"（模拟数据）"));
+    openWatch();
+    if(document.getElementById("screen-home").classList.contains("active")) renderHome();
+  });
 }
-function disconnectWatch(){
-  store("watch",null); toast("已断开"); openWatch();
-  if(document.getElementById("screen-home").classList.contains("active")) renderHome();
-}
+function disconnectWatch(){ WatchSync.disconnect(); store("watch",null); toast("已断开"); openWatch(); if(document.getElementById("screen-home").classList.contains("active")) renderHome(); }
 
 /* ============ SETTINGS ============ */
 function openSettings(){
@@ -717,51 +840,33 @@ function openSettings(){
   accents.forEach(function(c){ html+='<div class="swatch'+(s.accent===c?" on":"")+'" data-c="'+c+'" style="background:'+c+'" onclick="setAccent(\''+c+'\')"></div>'; });
   html+='</div></div>';
   html+='<div class="opt" onclick="clearData()" style="cursor:pointer"><div>清除所有本地数据</div><div class="go">›</div></div>';
-  html+='<div class="hint" style="margin-top:14px">PaceRun v1.0 · 数据保存在本机</div>';
+  html+='<div class="hint" style="margin-top:14px">PaceRun v2.0 · 数据保存在本机</div>';
   openModal(html);
 }
-function setUnit(u){
-  var s=getStore("settings",{}); s.units=u; store("settings",s);
-  document.querySelectorAll("#unit-seg button").forEach(function(b){b.classList.toggle("on", (b.textContent==="公里"&&u==="km")||(b.textContent==="英里"&&u==="mi"));});
-  renderHome(); renderProfile();
-  toast("单位已切换为 "+(u==="mi"?"英里":"公里"));
-}
-function setAccent(c){
-  var s=getStore("settings",{}); s.accent=c; store("settings",s);
-  applyAccent();
-  document.querySelectorAll("#accent-row .swatch").forEach(function(sw){sw.classList.toggle("on", sw.getAttribute("data-c")===c);});
-  toast("主题色已更新");
-}
-function applyAccent(){
-  var s=getStore("settings",{});
-  if(s.accent) document.documentElement.style.setProperty("--accent", s.accent);
-}
-function clearData(){
-  openModal(
-    '<h3>清除本地数据 <button class="close" onclick="closeModal()">×</button></h3>'+
-    '<div class="muted" style="margin:6px 0 16px">将删除所有账号、跑步记录与设置，并退出登录。此操作不可恢复。</div>'+
-    '<div class="run-controls"><button class="btn ghost" onclick="closeModal()">取消</button>'+
-    '<button class="btn" style="background:var(--red);color:#fff" onclick="doClearData()">确认清除</button></div>'
-  );
-}
-function doClearData(){
-  ["users","session","runs","plans","watch","settings","routes"].forEach(function(k){ try{localStorage.removeItem(PREFIX+k);}catch(e){} });
-  store("session",null);
-  closeModal(); location.reload();
-}
+function setUnit(u){ var s=getStore("settings",{}); s.units=u; store("settings",s);
+  document.querySelectorAll("#unit-seg button").forEach(function(b){b.classList.toggle("on",(b.textContent==="公里"&&u==="km")||(b.textContent==="英里"&&u==="mi"));});
+  renderHome(); renderProfile(); toast("单位已切换为 "+(u==="mi"?"英里":"公里")); }
+function setAccent(c){ var s=getStore("settings",{}); s.accent=c; store("settings",s); applyAccent();
+  document.querySelectorAll("#accent-row .swatch").forEach(function(sw){sw.classList.toggle("on", sw.getAttribute("data-c")===c);}); toast("主题色已更新"); }
+function applyAccent(){ var s=getStore("settings",{}); if(s.accent) document.documentElement.style.setProperty("--accent", s.accent); }
+function clearData(){ openModal('<h3>清除本地数据 <button class="close" onclick="closeModal()">×</button></h3>'+
+  '<div class="muted" style="margin:6px 0 16px">将删除所有账号、跑步记录、计划与设置，并退出登录。此操作不可恢复。</div>'+
+  '<div class="run-controls"><button class="btn ghost" onclick="closeModal()">取消</button>'+
+  '<button class="btn" style="background:var(--red);color:#fff" onclick="doClearData()">确认清除</button></div>'); }
+function doClearData(){ ["users","session","runs","plans","watch","settings","routes"].forEach(function(k){ try{localStorage.removeItem(PREFIX+k);}catch(e){} });
+  store("session",null); closeModal(); location.reload(); }
 
 /* ============ modal / toast ============ */
 function openModal(html){ var r=document.getElementById("modal-root"); r.innerHTML='<div class="modal" onclick="event.stopPropagation()">'+html+'</div>'; r.classList.add("show"); }
 function closeModal(){ var r=document.getElementById("modal-root"); r.classList.remove("show"); r.innerHTML=""; }
 var toastTimer=null;
-function toast(msg){ var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},2200); }
+function toast(msg){ var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},2400); }
 
 /* ============ boot ============ */
 (function boot(){
-  seedIfEmpty();
-  applyAccent();
+  seedIfEmpty(); applyAccent();
   var u=currentUser();
-  if(u){ enterApp(); } else { authTab("login"); }
+  if(u){ enterApp(); } else { authTab("login"); setLoginMethod("email"); }
 })();
 </script>
 </body>
