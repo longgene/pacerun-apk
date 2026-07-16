@@ -1,0 +1,8 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="Theme.PaceRun" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#161618</item>
+        <item name="android:statusBarColor">#161618</item>
+        <item name="android:navigationBarColor">#161618</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>
