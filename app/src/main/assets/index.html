@@ -2,560 +2,767 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PaceRun · 跑步运动追踪 App 原型</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Outfit:wght@400;500;700&display=swap" rel="stylesheet" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>PaceRun · 跑步运动</title>
 <meta name="theme-color" content="#161618" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="PaceRun" />
-
-<link rel="icon" type="image/png" href="icon-192.png" />
-<link rel="apple-touch-icon" href="icon-192.png" />
 <style>
   :root{
-    --bg:#161618; --card:#1F1F22; --card-active:#2A2520; --line:#2A2A2D;
-    --primary:#FF8C42; --mint:#4ED5A2; --amber:#FFB347;
-    --text:#F5F2EE; --sub:#B5A294;
-    --radius-card:16px; --radius-row:14px; --radius-pill:27px; --radius-tab:31px;
-    --pad:24px; --gap:16px;
+    --bg:#161618; --card:#1f1f22; --card2:#26262a; --line:#2e2e33;
+    --accent:#FF8C42; --accent-soft:#FF8C4222; --green:#4ED5A2; --yellow:#FFB347;
+    --text:#F5F5F7; --sub:#9A9AA0; --red:#FF5C5C; --blue:#5AA9FF;
+    --r:18px; --safe-b:env(safe-area-inset-bottom,0px);
   }
-  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  html,body{height:100%}
   body{
-    background:#0d0d0f; color:var(--text);
-    font-family:"Noto Sans SC",system-ui,sans-serif;
-    display:flex; align-items:center; justify-content:center;
-    min-height:100vh; padding:24px; overflow:hidden;
+    font-family:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);overflow:hidden;
+    -webkit-font-smoothing:antialiased;
   }
-  .num{font-family:"Outfit",sans-serif;}
+  #app{height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;background:var(--bg)}
+  .hidden{display:none !important}
+  .screen,.view{display:none}
+  .screen.active,.view.active{display:flex;flex-direction:column;flex:1;min-height:0}
 
-  /* phone frame */
-  .phone{
-    position:relative; width:375px; height:812px; background:var(--bg);
-    border-radius:44px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.6);
-    border:1px solid #26262b;
-  }
+  /* ===== Auth ===== */
+  #screen-auth{flex:1;padding:32px 24px;justify-content:center;gap:18px}
+  .brand{text-align:center;margin-bottom:8px}
+  .brand .logo{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--yellow));display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px;box-shadow:0 8px 24px var(--accent-soft)}
+  .brand h1{font-size:26px;font-weight:700}
+  .brand p{color:var(--sub);font-size:13px;margin-top:6px}
+  .seg{display:flex;background:var(--card);border-radius:14px;padding:4px;gap:4px}
+  .seg button{flex:1;border:0;background:transparent;color:var(--sub);padding:11px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+  .seg button.on{background:var(--accent);color:#1a1206}
+  .form{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:13px;color:var(--sub);padding-left:4px}
+  .field input{background:var(--card);border:1.5px solid var(--line);border-radius:12px;color:var(--text);padding:14px 14px;font-size:15px;outline:none;transition:.15s}
+  .field input:focus{border-color:var(--accent)}
+  .field.err input{border-color:var(--red)}
+  .field .msg{font-size:12px;color:var(--red);padding-left:4px;min-height:14px}
+  .btn{background:var(--accent);color:#1a1206;border:0;border-radius:14px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  .btn[disabled]{opacity:.5}
+  .btn.ghost{background:var(--card);color:var(--text)}
+  .btn.green{background:var(--green);color:#06231a}
+  .hint{text-align:center;color:var(--sub);font-size:12px;margin-top:4px}
+  .hint a{color:var(--accent);cursor:pointer}
 
-  /* screens: CSS-only navigation via :target */
-  .screen{position:absolute; inset:0; display:none; flex-direction:column; background:var(--bg);}
-  .screen:target{display:flex;}
-  #R1{display:flex;} /* default screen when no hash */
+  /* ===== Main layout ===== */
+  #topbar{padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  #topbar .tb-title{font-size:20px;font-weight:700}
+  #topbar .tb-sub{font-size:12px;color:var(--sub);margin-top:2px}
+  #topbar .tb-icon{width:40px;height:40px;border-radius:12px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer}
+  #views{flex:1;overflow-y:auto;padding:8px 18px calc(20px + var(--safe-b))}
+  #views::-webkit-scrollbar{width:0}
+  .view{padding-bottom:8px}
 
-  /* status bar */
-  .statusbar{
-    height:62px; flex:0 0 62px; display:flex; align-items:center; justify-content:space-between;
-    padding:0 24px; font-family:"Outfit",sans-serif; font-weight:600; font-size:15px; color:var(--text);
-  }
-  .statusbar .sb-icons{display:flex; align-items:center; gap:6px;}
+  .card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:14px}
+  .card.tap{cursor:pointer;transition:.15s}
+  .card.tap:active{transform:scale(.99)}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .muted{color:var(--sub);font-size:13px}
+  .accent{color:var(--accent)}
+  .green{color:var(--green)}
 
-  /* scrollable content */
-  .content{flex:1 1 auto; overflow-y:auto; padding:var(--pad); display:flex; flex-direction:column; gap:var(--gap);}
-  .content::-webkit-scrollbar{width:0;}
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .stat{background:var(--card);border-radius:16px;padding:16px}
+  .stat .v{font-size:24px;font-weight:700;margin-top:4px}
+  .stat .u{font-size:12px;color:var(--sub);margin-left:3px;font-weight:400}
+  .stat .k{font-size:12px;color:var(--sub)}
 
-  /* header row */
-  .hdr{display:flex; align-items:center; justify-content:space-between;}
-  .hdr .title{font-size:20px; font-weight:700;}
-  .hdr .sub{font-size:14px; color:var(--sub); margin-top:2px;}
-  .icon-btn{width:24px; height:24px; display:flex; align-items:center; justify-content:center; color:var(--sub); text-decoration:none;}
+  .bigbtn{width:100%;background:linear-gradient(135deg,var(--accent),var(--yellow));color:#1a1206;border:0;border-radius:18px;padding:18px;font-size:18px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 10px 30px var(--accent-soft)}
+  .bigbtn:active{transform:scale(.98)}
 
-  /* avatar */
-  .avatar{width:56px; height:56px; border-radius:28px; background:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:24px; color:var(--bg);}
+  .week{display:flex;justify-content:space-between;align-items:flex-end;height:110px;gap:8px;margin-top:8px}
+  .week .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+  .week .bar{width:100%;max-width:22px;background:var(--card2);border-radius:6px 6px 3px 3px;position:relative;overflow:hidden}
+  .week .bar i{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(var(--accent),var(--yellow));border-radius:6px}
+  .week .lab{font-size:11px;color:var(--sub)}
+  .week .day.today .lab{color:var(--accent);font-weight:700}
 
-  /* text helpers */
-  .t-title{font-size:26px; font-weight:700; color:var(--text);}
-  .t-sub{font-size:15px; color:var(--sub);}
-  .muted{color:var(--sub);}
+  .list-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .list-item:last-child{border-bottom:0}
+  .list-item .ic{width:44px;height:44px;border-radius:13px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .list-item .main{flex:1;min-width:0}
+  .list-item .main .t{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .list-item .main .s{font-size:12px;color:var(--sub);margin-top:2px}
+  .list-item .go{color:var(--sub);font-size:18px}
 
-  /* card */
-  .card{background:var(--card); border-radius:var(--radius-card);}
+  .check{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:transparent}
+  .check.on{background:var(--green);border-color:var(--green);color:#06231a}
 
-  /* stat card row */
-  .statcard{display:flex; align-items:center; justify-content:space-around; height:72px; padding:0 8px;}
-  .stat{display:flex; flex-direction:column; align-items:center; gap:4px; width:104px;}
-  .stat .v{font-family:"Outfit",sans-serif; font-weight:700; font-size:22px; color:var(--text);}
-  .stat .l{font-size:12px; color:var(--sub);}
+  .progress{height:8px;border-radius:6px;background:var(--card2);overflow:hidden;margin-top:10px}
+  .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--yellow));border-radius:6px;transition:.3s}
 
-  /* menu item */
-  .menuitem{display:flex; align-items:center; justify-content:space-between; height:52px; background:var(--card); border-radius:var(--radius-row); padding:0 16px; text-decoration:none; color:var(--text);}
-  .menuitem .left{display:flex; align-items:center; gap:14px;}
-  .menuitem .lbl{font-size:15px; color:var(--text);}
+  /* ===== Run tracker ===== */
+  #screen-run{align-items:center;justify-content:center;padding:24px;text-align:center}
+  .run-ring{width:240px;height:240px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p,0)*1%),var(--card) 0);display:flex;align-items:center;justify-content:center;position:relative;margin:10px 0}
+  .run-ring .inner{width:196px;height:196px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .run-time{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:1px}
+  .run-sub{color:var(--sub);font-size:13px;margin-top:4px}
+  .run-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;margin:18px 0}
+  .run-stat{background:var(--card);border-radius:14px;padding:12px}
+  .run-stat .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+  .run-stat .k{font-size:11px;color:var(--sub);margin-top:3px}
+  .run-controls{display:flex;gap:12px;width:100%}
+  .run-controls .btn{flex:1}
+  .run-idle .big{font-size:64px;margin-bottom:10px}
+  .run-idle .t{font-size:22px;font-weight:700}
+  .run-idle .s{color:var(--sub);font-size:13px;margin:8px 0 22px}
 
-  /* pill filter (radio-driven) */
-  .filter{display:flex; background:var(--card); border-radius:18px; padding:2px; gap:2px;}
-  .filter .f{flex:1; text-align:center; padding:8px 0; font-size:13px; color:var(--sub); border-radius:16px; border:1px solid transparent; cursor:pointer;}
-  .filter input:checked + .f{background:var(--primary); color:var(--bg); font-weight:600;}
+  /* ===== Tab bar ===== */
+  #tabbar{display:flex;background:#121214;border-top:1px solid var(--line);padding:8px 6px calc(8px + var(--safe-b));flex-shrink:0}
+  #tabbar button{flex:1;border:0;background:transparent;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;cursor:pointer;padding:4px 0}
+  #tabbar button .ti{font-size:21px;line-height:1}
+  #tabbar button.on{color:var(--accent)}
 
-  /* summary row */
-  .summary{display:flex; gap:10px;}
-  .summary .s{flex:1; background:var(--card); border-radius:14px; padding:14px 12px; display:flex; flex-direction:column; gap:6px;}
-  .summary .s .v{font-family:"Outfit",sans-serif; font-weight:700; font-size:20px; color:var(--text);}
-  .summary .s .l{font-size:12px; color:var(--sub);}
+  /* ===== Modal ===== */
+  #modal-root{position:fixed;inset:0;background:#000a;display:none;align-items:flex-end;justify-content:center;z-index:50}
+  #modal-root.show{display:flex}
+  .modal{background:var(--card);width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:22px 20px calc(22px + var(--safe-b));max-height:88%;overflow-y:auto;animation:up .22s ease}
+  @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal h3{font-size:18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+  .modal .close{font-size:22px;color:var(--sub);cursor:pointer;background:none;border:0}
+  .opt{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line)}
+  .opt:last-child{border-bottom:0}
+  .seg-sm{display:flex;background:var(--card2);border-radius:10px;padding:3px}
+  .seg-sm button{border:0;background:transparent;color:var(--sub);padding:8px 14px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+  .seg-sm button.on{background:var(--accent);color:#1a1206}
+  .swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent}
+  .swatch.on{border-color:#fff}
 
-  /* ring widget */
-  .ringcard{background:var(--card); border-radius:20px; padding:16px; display:flex; flex-direction:column; align-items:center; gap:12px;}
-  .ringcard .pct{font-family:"Outfit",sans-serif; font-weight:700; font-size:30px; color:var(--text);}
-  .ringcard .cap{font-size:13px; color:var(--sub);}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#000d;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:80%;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  /* hr zones */
-  .hrcard{background:var(--card); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:12px;}
-  .hrcard .h{font-size:14px; color:var(--text); font-weight:600;}
-  .hrbars{display:flex; align-items:flex-end; gap:8px; height:80px;}
-  .hrbars .b{flex:1; border-radius:6px 6px 0 0;}
-
-  /* recent list */
-  .recent{background:var(--card); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:12px;}
-  .recent .h{font-size:14px; color:var(--text); font-weight:600;}
-  .run{display:flex; align-items:center; justify-content:space-between;}
-  .run .l{display:flex; flex-direction:column; gap:2px;}
-  .run .l .t{font-size:14px; color:var(--text);}
-  .run .l .d{font-size:12px; color:var(--sub);}
-  .run .r{font-family:"Outfit",sans-serif; font-weight:600; font-size:14px; color:var(--primary);}
-
-  /* CTA (anchor) */
-  .cta{height:54px; background:var(--primary); border-radius:var(--radius-pill); display:flex; align-items:center; justify-content:center; gap:10px; font-weight:700; font-size:17px; color:var(--bg); border:none; width:100%; cursor:pointer; text-decoration:none;}
-  .cta.ghost{background:transparent; color:var(--sub); font-weight:500; font-size:14px;}
-
-  /* brand cards (device) */
-  .brandcard{display:flex; align-items:center; justify-content:space-between; height:64px; background:var(--card); border-radius:16px; padding:0 16px;}
-  .brandcard .left{display:flex; align-items:center; gap:14px;}
-  .brandcard .nm{font-size:16px; font-weight:600; color:var(--text);}
-  .tag{font-size:12px; font-weight:500; color:var(--mint);}
-
-  /* toggle (static) */
-  .toggle{width:44px; height:26px; border-radius:13px; background:var(--primary); position:relative; flex:0 0 44px;}
-  .toggle .knob{position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:var(--bg);}
-  .toggle.off{background:#3a3a40;}
-  .toggle.off .knob{right:auto; left:2px;}
-
-  /* tabbar */
-  .tabbar{height:95px; flex:0 0 95px; display:flex; align-items:center; justify-content:center; padding:12px; background:var(--bg);}
-  .tabbar .pill{width:351px; height:62px; background:var(--card); border-radius:var(--radius-tab); border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:4px; gap:4px;}
-  .tab{flex:1; height:54px; border-radius:27px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--sub); cursor:pointer; text-decoration:none;}
-  .tab.on{background:var(--card-active); color:var(--primary); border:1px solid var(--primary);}
-  .tab .lab{font-size:10px;}
-
-  /* code input */
-  .code{display:flex; gap:10px; justify-content:center;}
-  .code .box{width:48px; height:56px; border-radius:12px; background:var(--card); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-family:"Outfit",sans-serif; font-size:22px; color:var(--text);}
-
-  /* list rows generic */
-  .row{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--card); border-radius:12px; font-size:15px; color:var(--text);}
-  .row .val{color:var(--sub);}
-
-  /* week strip */
-  .week{display:flex; justify-content:space-between; gap:6px;}
-  .week .d{flex:1; height:56px; border-radius:14px; background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:12px; color:var(--sub);}
-  .week .d .num{font-family:"Outfit",sans-serif; font-weight:600;}
-  .week .d.on{background:var(--primary); color:var(--bg);}
-  .week .d.on .num{color:var(--bg);}
-
-  /* schedule row */
-  .sched{display:flex; align-items:center; gap:12px; background:var(--card); border-radius:14px; padding:14px; height:64px;}
-  .sched .bar{width:4px; height:36px; border-radius:2px;}
-  .sched .body{display:flex; flex-direction:column; gap:4px;}
-  .sched .body .t{font-size:15px; color:var(--text);}
-  .sched .body .d{font-size:12px; color:var(--sub);}
-
-  /* segmented selector (radio-driven) */
-  .seg{display:flex; gap:8px;}
-  .seg .opt{flex:1; text-align:center; padding:12px 0; border-radius:14px; background:var(--card); color:var(--sub); font-size:14px; border:1px solid transparent; cursor:pointer;}
-  .seg input:checked + .opt{background:var(--card-active); color:var(--primary); border:1px solid var(--primary); font-weight:600;}
-
-  .chip{display:flex; align-items:center; gap:10px; background:#16302A; border-radius:16px; padding:14px 16px; color:var(--text); font-weight:600;}
-
-  .timecard{background:var(--card); border-radius:16px; padding:18px; text-align:center; font-family:"Outfit",sans-serif; font-weight:700; font-size:30px; color:var(--text);}
-
-  .devcard{display:flex; align-items:center; gap:16px; background:var(--card); border-radius:20px; padding:20px;}
-  .devcard .body{display:flex; flex-direction:column; gap:4px;}
-  .devcard .body .t{font-size:17px; font-weight:600; color:var(--text);}
-  .devcard .body .s{font-size:13px; color:var(--mint);}
-
-  .spacer{flex:1 1 auto;}
-  .center{text-align:center;}
-  svg{display:block;}
-
-  /* hidden radio inputs */
-  .rk{position:absolute; width:0; height:0; opacity:0; pointer-events:none;}
+  .summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0}
+  .summary-grid .st{background:var(--card2);border-radius:14px;padding:14px;text-align:center}
+  .summary-grid .st .v{font-size:22px;font-weight:700}
+  .summary-grid .st .k{font-size:12px;color:var(--sub);margin-top:4px}
+  .empty{text-align:center;color:var(--sub);padding:40px 0;font-size:14px}
+  .avatar{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--yellow));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#1a1206}
+  .dev{display:flex;align-items:center;gap:12px;padding:14px;background:var(--card2);border-radius:14px;margin-bottom:10px}
+  .dev .di{width:42px;height:42px;border-radius:12px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px}
 </style>
 </head>
 <body>
-<div class="phone" id="phone">
+<div id="app">
 
-  <!-- ============ R1 注册欢迎 ============ -->
-  <section class="screen" id="R1">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:18px">
-      <div class="spacer"></div>
-      <div class="center">
-        <div style="font-family:'Outfit';font-weight:700;font-size:30px;color:var(--primary)">PaceRun</div>
-        <div class="t-sub" style="margin-top:10px">用运动重新认识自己</div>
-      </div>
-      <div class="spacer"></div>
-      <a class="cta" href="#R2">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="9" r="3.2" fill="#1F1F22"/><circle cx="15" cy="15" r="3.2" fill="#1F1F22"/><path d="M9 12c0 4 4 6 7 6" stroke="#1F1F22" stroke-width="2.4" stroke-linecap="round"/></svg>
-        微信登录</a>
-      <a class="cta" href="#R2" style="background:var(--card);color:var(--text)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="#F5F2EE"><path d="M16 3c-1 0-2 .6-2.6 1.4C12.6 4 11.9 4 11 4 8 4 6 6.2 6 9.4c0 1.6.4 3 .9 4.2-.6.3-1.4 1-1.8 1.9-.3.6 0 1 .3 1.1.4.1 1 .1 1.6-.2.8-.4 1.8-.9 2.6-1.2.6.3 1.3.4 2 .4 3 0 5.4-2.2 5.4-5.2 0-1-.3-2-.8-2.8C17.8 6.6 17 3 16 3z"/></svg>
-        Apple ID 登录</a>
-      <a class="cta ghost" href="#R2">手机号 / 邮箱注册</a>
+  <!-- ============ AUTH ============ -->
+  <section id="screen-auth" class="screen active">
+    <div class="brand">
+      <div class="logo">🏃</div>
+      <h1>PaceRun</h1>
+      <p>记录每一次奔跑</p>
     </div>
+    <div class="seg">
+      <button id="tab-login" class="on" onclick="authTab('login')">登录</button>
+      <button id="tab-register" onclick="authTab('register')">注册</button>
+    </div>
+
+    <!-- login -->
+    <form id="form-login" class="form" onsubmit="return doLogin(event)" autocomplete="off">
+      <div class="field" id="f-l-email">
+        <label>邮箱</label>
+        <input id="l-email" type="email" placeholder="you@example.com" />
+        <div class="msg"></div>
+      </div>
+      <div class="field" id="f-l-pwd">
+        <label>密码</label>
+        <input id="l-pwd" type="password" placeholder="请输入密码" />
+        <div class="msg"></div>
+      </div>
+      <label class="row" style="font-size:13px;color:var(--sub);gap:8px;cursor:pointer">
+        <input type="checkbox" id="l-remember" checked style="width:16px;height:16px;accent-color:var(--accent)" /> 记住我（7 天内自动登录）
+      </label>
+      <button class="btn" type="submit">登 录</button>
+      <div class="hint">还没有账号？<a onclick="authTab('register')">立即注册</a></div>
+    </form>
+
+    <!-- register -->
+    <form id="form-register" class="form hidden" onsubmit="return doRegister(event)" autocomplete="off">
+      <div class="field" id="f-r-name">
+        <label>昵称</label>
+        <input id="r-name" type="text" placeholder="2-20 个字符" />
+        <div class="msg"></div>
+      </div>
+      <div class="field" id="f-r-email">
+        <label>邮箱</label>
+        <input id="r-email" type="email" placeholder="you@example.com" />
+        <div class="msg"></div>
+      </div>
+      <div class="field" id="f-r-pwd">
+        <label>密码</label>
+        <input id="r-pwd" type="password" placeholder="至少 8 位，含字母和数字" />
+        <div class="msg"></div>
+      </div>
+      <div class="field" id="f-r-pwd2">
+        <label>确认密码</label>
+        <input id="r-pwd2" type="password" placeholder="再次输入密码" />
+        <div class="msg"></div>
+      </div>
+      <button class="btn" type="submit">注 册</button>
+      <div class="hint">已有账号？<a onclick="authTab('login')">去登录</a></div>
+    </form>
   </section>
 
-  <!-- ============ R2 账号验证 ============ -->
-  <section class="screen" id="R2">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:18px">
-      <div class="hdr"><a class="icon-btn" href="#R1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="muted" style="font-size:14px;text-decoration:none" href="#R1">返回</a></div>
-      <div class="t-title">验证手机号</div>
-      <div class="t-sub">验证码已发送至 +86 138****8866</div>
-      <div class="code"><div class="box">·</div><div class="box">·</div><div class="box">·</div><div class="box">·</div><div class="box">·</div><div class="box">·</div></div>
-      <div class="muted center" style="font-size:13px">59s 后重发</div>
-      <div class="spacer"></div>
-      <a class="cta" href="#R3">验证并继续</a>
+  <!-- ============ MAIN ============ -->
+  <div id="main" class="hidden" style="flex:1;display:flex;flex-direction:column;min-height:0">
+    <div id="topbar">
+      <div>
+        <div class="tb-title" id="tb-title">首页</div>
+        <div class="tb-sub" id="tb-sub"></div>
+      </div>
+      <div class="tb-icon" onclick="openSettings()">⚙️</div>
     </div>
-  </section>
 
-  <!-- ============ R3 个人资料 ============ -->
-  <section class="screen" id="R3">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:14px">
-      <div class="hdr"><a class="icon-btn" href="#R2"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div></div></div>
-      <div class="t-title">完善个人资料</div>
-      <div class="hdr" style="margin-top:4px"><div class="avatar">A</div><div class="icon-btn" style="color:var(--sub)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/><path d="M14 4L20 10L10 20H4V14L14 4Z" stroke="#B5A294" stroke-width="2" stroke-linejoin="round"/></svg></div></div>
-      <div class="row">昵称<span class="val">Alex</span></div>
-      <div class="row">性别<span class="val">男</span></div>
-      <div class="row">年龄<span class="val">28</span></div>
-      <div class="row">身高<span class="val">178 cm</span></div>
-      <div class="row">体重<span class="val">70 kg</span></div>
-      <div class="spacer"></div>
-      <a class="cta" href="#R4">下一步</a>
-    </div>
-  </section>
+    <main id="views">
+      <!-- HOME -->
+      <section id="screen-home" class="view active">
+        <div class="stat-grid">
+          <div class="stat"><div class="k">今日距离</div><div class="v"><span id="h-dist">0.00</span><span class="u" id="h-dist-u">km</span></div></div>
+          <div class="stat"><div class="k">本周跑步</div><div class="v"><span id="h-runs">0</span><span class="u">次</span></div></div>
+          <div class="stat"><div class="k">今日时长</div><div class="v"><span id="h-time">0:00</span></div></div>
+          <div class="stat"><div class="k">今日消耗</div><div class="v"><span id="h-cal">0</span><span class="u">kcal</span></div></div>
+        </div>
 
-  <!-- ============ R4 运动偏好 ============ -->
-  <section class="screen" id="R4">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:16px">
-      <div class="hdr"><a class="icon-btn" href="#R3"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div></div></div>
-      <div class="t-title">运动偏好</div>
-      <div class="muted" style="font-size:14px">跑步目标</div>
-      <div class="seg">
-        <input type="radio" name="r4g" id="r4g1" class="rk"><label class="opt" for="r4g1">减脂</label>
-        <input type="radio" name="r4g" id="r4g2" class="rk" checked><label class="opt" for="r4g2">健身</label>
-        <input type="radio" name="r4g" id="r4g3" class="rk"><label class="opt" for="r4g3">备赛</label>
-      </div>
-      <div class="muted" style="font-size:14px">配速偏好</div>
-      <div class="seg">
-        <input type="radio" name="r4p" id="r4p1" class="rk"><label class="opt" for="r4p1">轻松</label>
-        <input type="radio" name="r4p" id="r4p2" class="rk" checked><label class="opt" for="r4p2">中等</label>
-        <input type="radio" name="r4p" id="r4p3" class="rk"><label class="opt" for="r4p3">激进</label>
-      </div>
-      <div class="muted" style="font-size:14px">每周频次</div>
-      <div class="seg">
-        <input type="radio" name="r4f" id="r4f1" class="rk"><label class="opt" for="r4f1">1-2 次</label>
-        <input type="radio" name="r4f" id="r4f2" class="rk" checked><label class="opt" for="r4f2">3-4 次</label>
-        <input type="radio" name="r4f" id="r4f3" class="rk"><label class="opt" for="r4f3">5+ 次</label>
-      </div>
-      <div class="spacer"></div>
-      <a class="cta" href="#R5">下一步</a>
-    </div>
-  </section>
+        <div class="card">
+          <div class="row"><div style="font-weight:700">本周里程</div><div class="muted" id="h-week-total">0.00 km</div></div>
+          <div class="week" id="week-chart"></div>
+        </div>
 
-  <!-- ============ R5 体能评估 ============ -->
-  <section class="screen" id="R5">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:16px">
-      <div class="hdr"><a class="icon-btn" href="#R4"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div></div></div>
-      <div class="t-title">初始体能评估</div>
-      <div class="card" style="padding:18px"><div class="muted" style="font-size:14px;line-height:1.6">通过一组简单的测试（静息心率、3 分钟踏步、恢复心率），为你生成专属的起始训练 zones 与配速区间。</div></div>
-      <div class="spacer"></div>
-      <a class="cta" href="#R6">开始评估</a>
-      <a class="cta ghost" href="#R6">稍后再说</a>
-    </div>
-  </section>
+        <button class="bigbtn" onclick="goRun()">🏁 开始跑步</button>
 
-  <!-- ============ R6 设备连接引导 ============ -->
-  <section class="screen" id="R6">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:18px">
-      <div class="hdr"><a class="icon-btn" href="#R5"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="muted" style="font-size:14px;text-decoration:none" href="#R8">跳过</a></div>
-      <div class="t-title">连接你的运动手表</div>
-      <div class="t-sub">解锁实时心率、独立 GPS 与训练计划下发</div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="brandcard"><div class="left"><svg width="24" height="24" viewBox="0 0 40 40"><rect x="13" y="7" width="14" height="26" rx="5" fill="#F5F2EE"/><rect x="16" y="12" width="8" height="9" rx="2" fill="#161618"/><rect x="11" y="15" width="3" height="6" rx="1.5" fill="#F5F2EE"/><rect x="26" y="15" width="3" height="6" rx="1.5" fill="#F5F2EE"/></svg><span class="nm">Apple Watch</span></div><span class="tag">支持</span></div>
-        <div class="brandcard"><div class="left"><svg width="24" height="24" viewBox="0 0 40 40"><rect x="13" y="7" width="14" height="26" rx="5" fill="#4ED5A2"/><rect x="16" y="12" width="8" height="9" rx="2" fill="#161618"/><rect x="11" y="15" width="3" height="6" rx="1.5" fill="#4ED5A2"/><rect x="26" y="15" width="3" height="6" rx="1.5" fill="#4ED5A2"/></svg><span class="nm">Garmin</span></div><span class="tag">支持</span></div>
-        <div class="brandcard"><div class="left"><svg width="24" height="24" viewBox="0 0 40 40"><rect x="13" y="7" width="14" height="26" rx="5" fill="#FFB347"/><rect x="16" y="12" width="8" height="9" rx="2" fill="#161618"/><rect x="11" y="15" width="3" height="6" rx="1.5" fill="#FFB347"/><rect x="26" y="15" width="3" height="6" rx="1.5" fill="#FFB347"/></svg><span class="nm">华为手表</span></div><span class="tag">支持</span></div>
-      </div>
-      <div class="spacer"></div>
-      <a class="cta" href="#R7">开始连接</a>
-      <a class="cta ghost" href="#R8">稍后再说</a>
-    </div>
-  </section>
+        <div class="card tap" onclick="openWatch()" style="margin-top:14px">
+          <div class="row">
+            <div class="row" style="gap:12px">
+              <div class="ic" style="width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px">⌚</div>
+              <div><div id="watch-name" style="font-weight:600">运动手表</div><div class="muted" id="watch-state">未连接</div></div>
+            </div>
+            <div class="go">›</div>
+          </div>
+        </div>
 
-  <!-- ============ R7 蓝牙搜索与配对 ============ -->
-  <section class="screen" id="R7">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:18px">
-      <div class="hdr"><a class="icon-btn" href="#R6"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="title" style="font-size:18px">搜索设备</div><div></div></div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;height:160px;justify-content:center">
-        <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="36" stroke="#FF8C42" stroke-opacity=".2" stroke-width="2"/><circle cx="40" cy="40" r="24" stroke="#FF8C42" stroke-opacity=".4" stroke-width="2"/><circle cx="40" cy="40" r="12" stroke="#FF8C42" stroke-width="2"/></svg>
-        <div class="muted" style="font-size:14px">正在搜索附近的设备…</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="brandcard"><div class="left"><svg width="24" height="24" viewBox="0 0 40 40"><rect x="13" y="7" width="14" height="26" rx="5" fill="#FF8C42"/><rect x="16" y="12" width="8" height="9" rx="2" fill="#161618"/><rect x="11" y="15" width="3" height="6" rx="1.5" fill="#FF8C42"/><rect x="26" y="15" width="3" height="6" rx="1.5" fill="#FF8C42"/></svg><span class="nm">Apple Watch S9</span></div><span style="font-size:14px;font-weight:500;color:var(--amber)">配对中…</span></div>
-        <div class="brandcard"><div class="left"><svg width="24" height="24" viewBox="0 0 40 40"><rect x="13" y="7" width="14" height="26" rx="5" fill="#4ED5A2"/><rect x="16" y="12" width="8" height="9" rx="2" fill="#161618"/><rect x="11" y="15" width="3" height="6" rx="1.5" fill="#4ED5A2"/><rect x="26" y="15" width="3" height="6" rx="1.5" fill="#4ED5A2"/></svg><span class="nm">Garmin Forerunner 265</span></div><span style="font-size:14px;font-weight:500;color:var(--primary)">配对</span></div>
-        <div class="brandcard"><div class="left"><svg width="24" height="24" viewBox="0 0 40 40"><rect x="13" y="7" width="14" height="26" rx="5" fill="#FFB347"/><rect x="16" y="12" width="8" height="9" rx="2" fill="#161618"/><rect x="11" y="15" width="3" height="6" rx="1.5" fill="#FFB347"/><rect x="26" y="15" width="3" height="6" rx="1.5" fill="#FFB347"/></svg><span class="nm">HUAWEI WATCH GT 4</span></div><span style="font-size:14px;font-weight:500;color:var(--primary)">配对</span></div>
-      </div>
-      <div class="muted center" style="font-size:13px">确保手表已开启蓝牙并处于配对模式</div>
-      <div class="spacer"></div>
-      <a class="cta" href="#R8">完成配对</a>
-    </div>
-  </section>
+        <div style="font-weight:700;margin:6px 4px 4px">推荐路线</div>
+        <div id="route-list"></div>
+      </section>
 
-  <!-- ============ R8 授权与同步 ============ -->
-  <section class="screen" id="R8">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:18px">
-      <div class="hdr"><a class="icon-btn" href="#R7"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="title" style="font-size:18px">数据授权</div><div></div></div>
-      <div class="chip"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="#4ED5A2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Apple Watch S9 已连接</div>
-      <div class="muted" style="font-size:14px;font-weight:500">同步以下数据</div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="row">心率<span class="toggle"><span class="knob"></span></span></div>
-        <div class="row">GPS 轨迹<span class="toggle"><span class="knob"></span></span></div>
-        <div class="row">训练计划下发<span class="toggle"><span class="knob"></span></span></div>
-        <div class="row">健康数据<span class="toggle"><span class="knob"></span></span></div>
-      </div>
-      <div class="spacer"></div>
-      <a class="cta" href="#D1">开始同步</a>
-    </div>
-  </section>
+      <!-- RUN -->
+      <section id="screen-run" class="view"></section>
 
-  <!-- ============ W 设备中心 ============ -->
-  <section class="screen" id="W">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:18px">
-      <div class="hdr"><a class="icon-btn" href="#M"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="title" style="font-size:20px">我的设备</div><div></div></div>
-      <div class="muted" style="font-size:14px">管理已连接的智能手表</div>
-      <div class="devcard"><svg width="24" height="24" viewBox="0 0 40 40"><rect x="13" y="7" width="14" height="26" rx="5" fill="#FF8C42"/><rect x="16" y="12" width="8" height="9" rx="2" fill="#161618"/><rect x="11" y="15" width="3" height="6" rx="1.5" fill="#FF8C42"/><rect x="26" y="15" width="3" height="6" rx="1.5" fill="#FF8C42"/></svg><div class="body"><div class="t">Apple Watch S9</div><div class="s">已连接 · 电量 82%</div></div></div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="row">最近同步<span class="num" style="color:var(--text)">2 分钟前</span></div>
-        <div class="row">今日步数<span class="num" style="color:var(--text)">8,420</span></div>
-        <div class="row">心率采样<span class="num" style="color:var(--text)">实时</span></div>
-      </div>
-      <div class="spacer"></div>
-      <a class="cta" href="#W" style="background:var(--card);color:var(--primary);font-weight:600">重新同步</a>
-      <a class="cta ghost" href="#M" style="color:var(--amber)">解绑设备</a>
-    </div>
-  </section>
+      <!-- HISTORY -->
+      <section id="screen-history" class="view">
+        <div id="history-list"></div>
+      </section>
 
-  <!-- ============ D1 数据看板 ============ -->
-  <section class="screen" id="D1">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:16px">
-      <div class="hdr"><div><div class="muted" style="font-size:13px">早上好</div><div class="title" style="font-size:20px">Alex</div></div><div class="avatar">A</div></div>
-      <div class="filter">
-        <input type="radio" name="d1f" id="d1-day" class="rk" checked><label class="f" for="d1-day">日</label>
-        <input type="radio" name="d1f" id="d1-week" class="rk"><label class="f" for="d1-week">周</label>
-        <input type="radio" name="d1f" id="d1-month" class="rk"><label class="f" for="d1-month">月</label>
-        <input type="radio" name="d1f" id="d1-year" class="rk"><label class="f" for="d1-year">年</label>
-      </div>
-      <div class="summary"><div class="s"><div class="v">8.42</div><div class="l">公里</div></div><div class="s"><div class="v">46:12</div><div class="l">时长</div></div><div class="s"><div class="v">612</div><div class="l">千卡</div></div></div>
-      <div class="ringcard">
-        <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
-          <circle cx="100" cy="100" r="86" stroke="#2A2A2D" stroke-width="14"/>
-          <circle cx="100" cy="100" r="86" stroke="#FF8C42" stroke-width="14" stroke-linecap="round" stroke-dasharray="540" stroke-dashoffset="118" transform="rotate(-90 100 100)"/>
-          <circle cx="100" cy="100" r="62" stroke="#2A2A2D" stroke-width="14"/>
-          <circle cx="100" cy="100" r="62" stroke="#4ED5A2" stroke-width="14" stroke-linecap="round" stroke-dasharray="389" stroke-dashoffset="78" transform="rotate(-90 100 100)"/>
-          <circle cx="100" cy="100" r="38" stroke="#2A2A2D" stroke-width="14"/>
-          <circle cx="100" cy="100" r="38" stroke="#FFB347" stroke-width="14" stroke-linecap="round" stroke-dasharray="238" stroke-dashoffset="60" transform="rotate(-90 100 100)"/>
-        </svg>
-        <div class="pct">78%</div>
-        <div class="cap">本周目标完成度</div>
-      </div>
-      <div class="hrcard"><div class="h">心率区间分布</div><div class="hrbars">
-        <div class="b" style="height:30%;background:#4ED5A2"></div><div class="b" style="height:55%;background:#FFB347"></div><div class="b" style="height:80%;background:#FF8C42"></div><div class="b" style="height:65%;background:#FF6B6B"></div><div class="b" style="height:40%;background:#B388FF"></div>
-      </div></div>
-      <div class="recent"><div class="h">近期跑步</div>
-        <div class="run"><div class="l"><div class="t">晨跑 · 滨海绿道</div><div class="d">今天 06:40 · 8.42 km</div></div><div class="r">查看</div></div>
-        <div class="run"><div class="l"><div class="t">夜跑 · 公园环线</div><div class="d">昨天 19:10 · 6.10 km</div></div><div class="r">查看</div></div>
-      </div>
-      <a class="cta" href="#D2" style="margin-top:4px">开始跑步</a>
-    </div>
-    <div class="tabbar"><div class="pill">
-      <a class="tab on" href="#D1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="#FF8C42" stroke-width="2"/><rect x="13" y="3" width="8" height="8" rx="2" stroke="#FF8C42" stroke-width="2"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="#FF8C42" stroke-width="2"/><rect x="13" y="13" width="8" height="8" rx="2" stroke="#FF8C42" stroke-width="2"/></svg><span class="lab">看板</span></a>
-      <a class="tab" href="#P2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke="#B5A294" stroke-width="2"/><path d="M3 9H21M8 3V7M16 3V7" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">计划</span></a>
-      <a class="tab" href="#T1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 16V11C6 7.5 9 5 12 5C15 5 18 7.5 18 11V16L20 18H4L6 16Z" stroke="#B5A294" stroke-width="2" stroke-linejoin="round"/><path d="M10 20C10 21 14 21 14 20" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">提醒</span></a>
-      <a class="tab" href="#M"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#B5A294" stroke-width="2"/><path d="M4 20C4 16 8 14 12 14C16 14 20 16 20 20" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">我的</span></a>
-    </div></div>
-  </section>
+      <!-- PLANS -->
+      <section id="screen-plans" class="view">
+        <div class="card">
+          <div class="row"><div style="font-weight:700">训练进度</div><div class="accent" id="plan-pct">0%</div></div>
+          <div class="progress"><i id="plan-bar" style="width:0%"></i></div>
+        </div>
+        <div id="plan-list"></div>
+      </section>
 
-  <!-- ============ D2 跑步详情 ============ -->
-  <section class="screen" id="D2">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:16px">
-      <div class="hdr"><a class="icon-btn" href="#D1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="title" style="font-size:18px">晨跑 · 8.42 公里</div><div></div></div>
-      <div class="summary"><div class="s"><div class="v">5:28</div><div class="l">平均配速</div></div><div class="s"><div class="v">148</div><div class="l">平均心率</div></div><div class="s"><div class="v">172</div><div class="l">步频</div></div></div>
-      <div class="card" style="padding:16px"><div class="muted" style="font-size:14px;font-weight:600;margin-bottom:10px">配速曲线</div>
-        <svg width="100%" height="120" viewBox="0 0 320 120" fill="none" preserveAspectRatio="none"><path d="M0 80 Q40 60 80 70 T160 50 T240 65 T320 40" stroke="#FF8C42" stroke-width="3" fill="none"/></svg>
-      </div>
-      <div class="hrcard"><div class="h">心率区间</div><div class="hrbars">
-        <div class="b" style="height:30%;background:#4ED5A2"></div><div class="b" style="height:55%;background:#FFB347"></div><div class="b" style="height:80%;background:#FF8C42"></div><div class="b" style="height:65%;background:#FF6B6B"></div><div class="b" style="height:40%;background:#B388FF"></div>
-      </div></div>
-      <div class="recent"><div class="h">步频 / 步幅</div>
-        <div class="run"><div class="l"><div class="t">平均步频</div><div class="d">spm</div></div><div class="r">172</div></div>
-        <div class="run"><div class="l"><div class="t">平均步幅</div><div class="d">cm</div></div><div class="r">98</div></div>
-      </div>
-    </div>
-  </section>
+      <!-- PROFILE -->
+      <section id="screen-profile" class="view">
+        <div class="card row">
+          <div class="row" style="gap:14px">
+            <div class="avatar" id="p-avatar">P</div>
+            <div><div id="p-name" style="font-size:18px;font-weight:700"></div><div class="muted" id="p-email"></div></div>
+          </div>
+        </div>
+        <div class="stat-grid" style="margin-bottom:14px">
+          <div class="stat"><div class="k">累计跑步</div><div class="v"><span id="p-runs">0</span><span class="u">次</span></div></div>
+          <div class="stat"><div class="k">累计距离</div><div class="v"><span id="p-dist">0</span><span class="u" id="p-dist-u">km</span></div></div>
+          <div class="stat"><div class="k">累计时长</div><div class="v" id="p-time">0:00</div></div>
+          <div class="stat"><div class="k">累计消耗</div><div class="v"><span id="p-cal">0</span><span class="u">kcal</span></div></div>
+        </div>
+        <div class="card tap" onclick="editName()"><div class="row"><div>✏️ 修改昵称</div><div class="go">›</div></div></div>
+        <div class="card tap" onclick="openWatch()"><div class="row"><div>⌚ 我的设备</div><div class="go">›</div></div></div>
+        <div class="card tap" onclick="openSettings()"><div class="row"><div>⚙️ 设置</div><div class="go">›</div></div></div>
+        <button class="btn ghost" style="margin-top:6px" onclick="doLogout()">退出登录</button>
+        <div class="hint" style="margin:14px 0">PaceRun · 让运动更有温度</div>
+      </section>
+    </main>
 
-  <!-- ============ P1 方案导入 ============ -->
-  <section class="screen" id="P1">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:16px">
-      <div class="hdr"><a class="icon-btn" href="#P2"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="title" style="font-size:18px">导入训练计划</div><div></div></div>
-      <div class="muted" style="font-size:14px">支持从文件或第三方平台导入，自动匹配到日历</div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="menuitem"><div class="left"><span style="color:var(--mint);font-weight:700">JSON</span><span class="lbl">从文件导入</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#B5A294" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="menuitem"><div class="left"><span style="color:var(--amber);font-weight:700">CSV</span><span class="lbl">从表格导入</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#B5A294" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="menuitem"><div class="left"><span style="color:var(--primary);font-weight:700">+</span><span class="lbl">从第三方平台导入</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#B5A294" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </div>
-      <div class="card" style="padding:16px"><div class="muted" style="font-size:13px;line-height:1.6">导入后系统将自动生成训练日程，你可手动调整日期、强度与提醒。</div></div>
-    </div>
-  </section>
-
-  <!-- ============ P2 训练日程 ============ -->
-  <section class="screen" id="P2">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:16px">
-      <div class="hdr"><a class="icon-btn" href="#P1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="title" style="font-size:18px">训练日程</div><div class="icon-btn" style="color:var(--primary);font-size:22px;font-weight:700" href="#P1">+</div></div>
-      <div class="week"><div class="d"><span>一</span><span class="num">15</span></div><div class="d on"><span>二</span><span class="num">16</span></div><div class="d"><span>三</span><span class="num">17</span></div><div class="d"><span>四</span><span class="num">18</span></div><div class="d"><span>五</span><span class="num">19</span></div><div class="d"><span>六</span><span class="num">20</span></div><div class="d"><span>日</span><span class="num">21</span></div></div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="sched"><div class="bar" style="background:var(--mint)"></div><div class="body"><div class="t">轻松恢复跑 · 5 km</div><div class="d">周二 07:00 · 强度低</div></div></div>
-        <div class="sched"><div class="bar" style="background:var(--primary)"></div><div class="body"><div class="t">间歇训练 · 10×400m</div><div class="d">周四 19:00 · 强度高</div></div></div>
-        <div class="sched"><div class="bar" style="background:var(--amber)"></div><div class="body"><div class="t">长距离慢跑 · 15 km</div><div class="d">周六 06:30 · 强度中</div></div></div>
-      </div>
-    </div>
-    <div class="tabbar"><div class="pill">
-      <a class="tab" href="#D1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/><rect x="13" y="3" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/><rect x="13" y="13" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/></svg><span class="lab">看板</span></a>
-      <a class="tab on" href="#P2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke="#FF8C42" stroke-width="2"/><path d="M3 9H21M8 3V7M16 3V7" stroke="#FF8C42" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">计划</span></a>
-      <a class="tab" href="#T1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 16V11C6 7.5 9 5 12 5C15 5 18 7.5 18 11V16L20 18H4L6 16Z" stroke="#B5A294" stroke-width="2" stroke-linejoin="round"/><path d="M10 20C10 21 14 21 14 20" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">提醒</span></a>
-      <a class="tab" href="#M"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#B5A294" stroke-width="2"/><path d="M4 20C4 16 8 14 12 14C16 14 20 16 20 20" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">我的</span></a>
-    </div></div>
-  </section>
-
-  <!-- ============ T1 训练提醒 ============ -->
-  <section class="screen" id="T1">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:16px">
-      <div class="hdr"><a class="icon-btn" href="#T2"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="title" style="font-size:18px">训练提醒</div><div class="icon-btn" style="color:var(--primary);font-weight:700;font-size:22px" href="#T2">+</div></div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="row">每日固定提醒 · 07:00<span class="toggle"><span class="knob"></span></span></div>
-        <div class="row">每周计划提醒<span class="toggle"><span class="knob"></span></span></div>
-        <div class="row">导入计划自动提醒<span class="toggle off"><span class="knob"></span></span></div>
-      </div>
-      <div class="card" style="padding:16px"><div class="muted" style="font-size:13px;line-height:1.6">开启后将在训练前通过推送通知与系统日历同步提醒你。</div></div>
-    </div>
-    <div class="tabbar"><div class="pill">
-      <a class="tab" href="#D1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/><rect x="13" y="3" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/><rect x="13" y="13" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/></svg><span class="lab">看板</span></a>
-      <a class="tab" href="#P2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke="#B5A294" stroke-width="2"/><path d="M3 9H21M8 3V7M16 3V7" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">计划</span></a>
-      <a class="tab on" href="#T1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 16V11C6 7.5 9 5 12 5C15 5 18 7.5 18 11V16L20 18H4L6 16Z" stroke="#FF8C42" stroke-width="2" stroke-linejoin="round"/><path d="M10 20C10 21 14 21 14 20" stroke="#FF8C42" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">提醒</span></a>
-      <a class="tab" href="#M"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#B5A294" stroke-width="2"/><path d="M4 20C4 16 8 14 12 14C16 14 20 16 20 20" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">我的</span></a>
-    </div></div>
-  </section>
-
-  <!-- ============ T2 新建提醒 ============ -->
-  <section class="screen" id="T2">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:16px">
-      <div class="hdr"><a class="icon-btn" href="#T1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19L8 12L15 5" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="title" style="font-size:18px">新建提醒</div><div></div></div>
-      <div class="timecard">07:00 <span style="font-size:16px;color:var(--sub)">上午</span></div>
-      <div class="row">重复<span class="val">每天</span></div>
-      <div class="row">提前量<span class="val">15 分钟</span></div>
-      <div class="row">推送通知<span class="toggle"><span class="knob"></span></span></div>
-      <div class="row">日历同步<span class="toggle"><span class="knob"></span></span></div>
-      <div class="spacer"></div>
-      <a class="cta" href="#T1">保存提醒</a>
-    </div>
-  </section>
-
-  <!-- ============ M 我的 ============ -->
-  <section class="screen" id="M">
-    <div class="statusbar"><span>9:41</span><span class="sb-icons">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17h2v4H3v-4zm4-3h2v7H7v-7zm4-3h2v10h-2V11zm4-4h2v14h-2V7zm4-3h2v17h-2V4z" fill="#F5F2EE"/></svg>
-      <svg width="22" height="18" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="19" height="11" rx="3" stroke="#F5F2EE" stroke-width="1.6"/><rect x="3" y="7" width="13" height="7" rx="1.5" fill="#F5F2EE"/><rect x="21" y="8" width="2" height="5" rx="1" fill="#F5F2EE"/></svg>
-    </span></div>
-    <div class="content" style="gap:14px">
-      <div class="hdr"><div class="avatar">A</div><div style="flex:1;padding-left:14px"><div class="title" style="font-size:20px">Alex</div><div class="muted" style="font-size:13px">黄金会员 · 已连接 Apple Watch</div></div><div class="icon-btn" style="color:var(--sub)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/><path d="M14 4L20 10L10 20H4V14L14 4Z" stroke="#B5A294" stroke-width="2" stroke-linejoin="round"/></svg></div></div>
-      <div class="statcard card"><div class="stat"><div class="v">842</div><div class="l">总里程 km</div></div><div class="stat"><div class="v">128</div><div class="l">总次数</div></div><div class="stat"><div class="v">56h</div><div class="l">总时长</div></div></div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <a class="menuitem" href="#W"><div class="left"><svg width="24" height="24" viewBox="0 0 40 40" fill="none"><rect x="13" y="7" width="14" height="26" rx="5" fill="#FF8C42"/><rect x="16" y="12" width="8" height="9" rx="2" fill="#161618"/><rect x="11" y="15" width="3" height="6" rx="1.5" fill="#FF8C42"/><rect x="26" y="15" width="3" height="6" rx="1.5" fill="#FF8C42"/></svg><span class="lbl">我的设备</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#B5A294" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <a class="menuitem" href="#P2"><div class="left"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke="#4ED5A2" stroke-width="2"/><path d="M3 9H21M8 3V7M16 3V7" stroke="#4ED5A2" stroke-width="2" stroke-linecap="round"/></svg><span class="lbl">训练计划</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#B5A294" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <a class="menuitem" href="#T1"><div class="left"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6 16V11C6 7.5 9 5 12 5C15 5 18 7.5 18 11V16L20 18H4L6 16Z" stroke="#FFB347" stroke-width="2" stroke-linejoin="round"/><path d="M10 20C10 21 14 21 14 20" stroke="#FFB347" stroke-width="2" stroke-linecap="round"/></svg><span class="lbl">训练提醒</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#B5A294" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <a class="menuitem" href="#D1"><div class="left"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="#F5F2EE" stroke-width="2"/><rect x="13" y="3" width="8" height="8" rx="2" stroke="#F5F2EE" stroke-width="2"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="#F5F2EE" stroke-width="2"/><rect x="13" y="13" width="8" height="8" rx="2" stroke="#F5F2EE" stroke-width="2"/></svg><span class="lbl">运动数据</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#B5A294" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <a class="menuitem" href="#R3"><div class="left"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#F5F2EE" stroke-width="2"/><path d="M4 20C4 16 8 14 12 14C16 14 20 16 20 20" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round"/></svg><span class="lbl">个人资料</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#B5A294" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <a class="menuitem" href="#R3"><div class="left"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#F5F2EE" stroke-width="2"/><path d="M12 2V5M12 19V22M2 12H5M19 12H22M5 5L7 7M17 17L19 19M19 5L17 7M7 17L5 19" stroke="#F5F2EE" stroke-width="2" stroke-linecap="round"/></svg><span class="lbl">设置</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#B5A294" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-      </div>
-      <div class="spacer"></div>
-      <div class="center muted" style="font-size:15px;font-weight:500;padding:10px 0">退出登录</div>
-    </div>
-    <div class="tabbar"><div class="pill">
-      <a class="tab" href="#D1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/><rect x="13" y="3" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/><rect x="13" y="13" width="8" height="8" rx="2" stroke="#B5A294" stroke-width="2"/></svg><span class="lab">看板</span></a>
-      <a class="tab" href="#P2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke="#B5A294" stroke-width="2"/><path d="M3 9H21M8 3V7M16 3V7" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">计划</span></a>
-      <a class="tab" href="#T1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 16V11C6 7.5 9 5 12 5C15 5 18 7.5 18 11V16L20 18H4L6 16Z" stroke="#B5A294" stroke-width="2" stroke-linejoin="round"/><path d="M10 20C10 21 14 21 14 20" stroke="#B5A294" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">提醒</span></a>
-      <a class="tab on" href="#M"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#FF8C42" stroke-width="2"/><path d="M4 20C4 16 8 14 12 14C16 14 20 16 20 20" stroke="#FF8C42" stroke-width="2" stroke-linecap="round"/></svg><span class="lab">我的</span></a>
-    </div></div>
-  </section>
-
+    <nav id="tabbar">
+      <button class="on" data-target="home" onclick="navTo('home')"><span class="ti">🏠</span>首页</button>
+      <button data-target="run" onclick="navTo('run')"><span class="ti">🏁</span>跑步</button>
+      <button data-target="history" onclick="navTo('history')"><span class="ti">📊</span>历史</button>
+      <button data-target="plans" onclick="navTo('plans')"><span class="ti">📋</span>计划</button>
+      <button data-target="profile" onclick="navTo('profile')"><span class="ti">👤</span>我的</button>
+    </nav>
+  </div>
 </div>
 
+<div id="modal-root" onclick="if(event.target===this)closeModal()"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+"use strict";
+/* ============ storage ============ */
+var PREFIX = "pr_";
+function store(k, v){ try{ localStorage.setItem(PREFIX+k, typeof v==="string"?v:JSON.stringify(v)); }catch(e){ mem[k]=v; } }
+function getStore(k, def){ try{ var s=localStorage.getItem(PREFIX+k); return s==null?def:JSON.parse(s); }catch(e){ return (k in mem)?mem[k]:def; } }
+var mem = {};
+function cyrb53(str, seed){ seed=seed||0; var h1=0xdeadbeef^seed,h2=0x41c6ce57^seed; for(var i=0,ch; i<str.length; i++){ ch=str.charCodeAt(i); h1=Math.imul(h1^ch,2654435761); h2=Math.imul(h2^ch,1597334677);} h1=Math.imul(h1^(h1>>>16),2246822507); h1^=Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507); h2^=Math.imul(h1^(h1>>>13),3266489909); return (h2>>>0).toString(16)+(h1>>>0).toString(16);}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+/* ============ data ============ */
+function seedIfEmpty(){
+  if(getStore("plans",null)===null){
+    store("plans",[
+      {id:uid(),title:"新手 5K 计划",desc:"每周 3 次，循序渐进跑到 5 公里",done:false},
+      {id:uid(),title:"减脂燃脂计划",desc:"慢跑结合间歇，提升代谢效率",done:false},
+      {id:uid(),title:"半马备战",desc:"12 周系统训练，冲击 21.1 KM",done:false}
+    ]);
+  }
+  if(getStore("routes",null)===null){
+    store("routes",[
+      {id:uid(),name:"滨江公园环线",dist:5.2,tag:"风景",icon:"🌳"},
+      {id:uid(),name:"老城夜跑",dist:3.8,tag:"夜景",icon:"🌃"},
+      {id:uid(),name:"山野越野",dist:8.5,tag:"挑战",icon:"⛰️"}
+    ]);
+  }
+  if(getStore("settings",null)===null){ store("settings",{units:"km",accent:"#FF8C42"}); }
+}
+
+/* ============ session / auth ============ */
+function getUsers(){ return getStore("users",[]); }
+function saveUsers(u){ store("users",u); }
+function currentUser(){
+  var s=getStore("session",null);
+  if(!s) return null;
+  if(s.expiresAt < Date.now()){ store("session",null); return null; }
+  var u=getUsers().find(function(x){return x.id===s.userId;});
+  return u||null;
+}
+function setSession(userId, remember){
+  var exp = Date.now() + (remember?7:1)*86400000;
+  store("session",{userId:userId, token:uid(), expiresAt:exp});
+}
+function authTab(t){
+  document.getElementById("form-login").classList.toggle("hidden", t!=="login");
+  document.getElementById("form-register").classList.toggle("hidden", t!=="register");
+  document.getElementById("tab-login").classList.toggle("on", t==="login");
+  document.getElementById("tab-register").classList.toggle("on", t==="register");
+}
+function setErr(fieldId, msg){
+  var f=document.getElementById(fieldId); if(!f) return;
+  f.classList.toggle("err", !!msg);
+  var m=f.querySelector(".msg"); if(m) m.textContent = msg||"";
+}
+function validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+function doRegister(ev){
+  ev.preventDefault();
+  var name=document.getElementById("r-name").value.trim();
+  var email=document.getElementById("r-email").value.trim();
+  var pwd=document.getElementById("r-pwd").value;
+  var pwd2=document.getElementById("r-pwd2").value;
+  var ok=true;
+  if(name.length<2||name.length>20){ setErr("f-r-name","昵称需 2-20 个字符"); ok=false; } else setErr("f-r-name","");
+  if(!validEmail(email)){ setErr("f-r-email","请输入有效的邮箱地址"); ok=false; } else setErr("f-r-email","");
+  if(pwd.length<8||!/[a-zA-Z]/.test(pwd)||!/\d/.test(pwd)){ setErr("f-r-pwd","密码至少 8 位，需含字母和数字"); ok=false; } else setErr("f-r-pwd","");
+  if(pwd!==pwd2){ setErr("f-r-pwd2","两次输入的密码不一致"); ok=false; } else setErr("f-r-pwd2","");
+  if(!ok) return false;
+  var users=getUsers();
+  if(users.some(function(u){return u.email.toLowerCase()===email.toLowerCase();})){
+    setErr("f-r-email","该邮箱已被注册"); return false;
+  }
+  var user={id:uid(),name:name,email:email,pw:cyrb53(pwd),createdAt:Date.now()};
+  users.push(user); saveUsers(users);
+  setSession(user.id, true);
+  toast("注册成功，欢迎加入 PaceRun！");
+  enterApp();
+  return false;
+}
+function doLogin(ev){
+  ev.preventDefault();
+  var email=document.getElementById("l-email").value.trim();
+  var pwd=document.getElementById("l-pwd").value;
+  var ok=true;
+  if(!validEmail(email)){ setErr("f-l-email","请输入有效的邮箱地址"); ok=false; } else setErr("f-l-email","");
+  if(pwd.length===0){ setErr("f-l-pwd","请输入密码"); ok=false; } else setErr("f-l-pwd","");
+  if(!ok) return false;
+  var user=getUsers().find(function(u){return u.email.toLowerCase()===email.toLowerCase();});
+  if(!user||user.pw!==cyrb53(pwd)){ setErr("f-l-pwd","邮箱或密码错误"); return false; }
+  var remember=document.getElementById("l-remember").checked;
+  setSession(user.id, remember);
+  toast("登录成功");
+  enterApp();
+  return false;
+}
+function doLogout(){ store("session",null); location.reload(); }
+
+/* ============ app enter / nav ============ */
+function enterApp(){
+  document.getElementById("screen-auth").classList.remove("active");
+  document.getElementById("main").classList.remove("hidden");
+  applyAccent();
+  navTo("home");
+}
+function navTo(target){
+  var titles={home:["首页",""],run:["跑步",""],history:["历史记录",""],plans:["训练计划",""],profile:["我的",""]};
+  document.querySelectorAll("#views .view").forEach(function(v){v.classList.remove("active");});
+  var el=document.getElementById("screen-"+target); if(el) el.classList.add("active");
+  document.querySelectorAll("#tabbar button").forEach(function(b){b.classList.toggle("on", b.dataset.target===target);});
+  document.getElementById("tb-title").textContent=titles[target][0];
+  if(target==="home") renderHome();
+  else if(target==="run") renderRun();
+  else if(target==="history") renderHistory();
+  else if(target==="plans") renderPlans();
+  else if(target==="profile") renderProfile();
+  document.getElementById("views").scrollTop=0;
+}
+function goRun(){ navTo("run"); }
+
+/* ============ units / format ============ */
+function kmToDisp(km){
+  var s=getStore("settings",{});
+  if(s.units==="mi") return (km*0.621371).toFixed(2);
+  return km.toFixed(2);
+}
+function unitSuffix(){ return getStore("settings",{}).units==="mi"?"mi":"km"; }
+function fmtTime(sec){
+  sec=Math.floor(sec); var h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  if(h>0) return h+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  return m+":"+String(s).padStart(2,"0");
+}
+function fmtPace(secPerKm){
+  if(!isFinite(secPerKm)||secPerKm<=0) return "--'--";
+  var m=Math.floor(secPerKm/60), s=Math.round(secPerKm%60);
+  return m+"'"+(s<10?"0":"")+s+'"';
+}
+
+/* ============ HOME ============ */
+function renderHome(){
+  var runs=getStore("runs",[]);
+  var today=new Date(); today.setHours(0,0,0,0);
+  var td=today.getTime();
+  var toRuns=runs.filter(function(r){return new Date(r.date).setHours(0,0,0,0)===td;});
+  var dist=toRuns.reduce(function(a,r){return a+r.distanceKm;},0);
+  var time=toRuns.reduce(function(a,r){return a+r.durationSec;},0);
+  var cal=toRuns.reduce(function(a,r){return a+r.calories;},0);
+  document.getElementById("h-dist").textContent=kmToDisp(dist);
+  document.getElementById("h-dist-u").textContent=unitSuffix();
+  document.getElementById("h-runs").textContent=toRuns.length;
+  document.getElementById("h-time").textContent=fmtTime(time);
+  document.getElementById("h-cal").textContent=Math.round(cal);
+
+  // week chart
+  var days=["日","一","二","三","四","五","六"];
+  var now=new Date(); now.setHours(0,0,0,0);
+  var data=[]; var max=0;
+  for(var i=6;i>=0;i--){
+    var d=new Date(now); d.setDate(now.getDate()-i);
+    var ds=d.getTime();
+    var sum=runs.filter(function(r){return new Date(r.date).setHours(0,0,0,0)===ds;}).reduce(function(a,r){return a+r.distanceKm;},0);
+    if(sum>max) max=sum;
+    data.push({label:days[d.getDay()], val:sum, today:(i===0)});
+  }
+  var chart=document.getElementById("week-chart"); chart.innerHTML="";
+  var wt=0; data.forEach(function(d){wt+=d.val;});
+  document.getElementById("h-week-total").textContent=kmToDisp(wt)+" "+unitSuffix();
+  data.forEach(function(d){
+    var day=document.createElement("div"); day.className="day"+(d.today?" today":"");
+    var h=max>0?Math.max(6,Math.round(d.val/max*100)):6;
+    day.innerHTML='<div class="bar"><i style="height:'+h+'%"></i></div><div class="lab">'+d.label+'</div>';
+    chart.appendChild(day);
+  });
+
+  // watch state
+  var w=getStore("watch",null);
+  document.getElementById("watch-name").textContent = w? w.name : "运动手表";
+  document.getElementById("watch-state").textContent = w? ("已连接 · 电量 "+w.battery+"%") : "未连接";
+
+  // routes
+  var routes=getStore("routes",[]);
+  var rl=document.getElementById("route-list"); rl.innerHTML="";
+  routes.forEach(function(rt){
+    var d=document.createElement("div"); d.className="card tap"; d.onclick=function(){ startRoute(rt); };
+    d.innerHTML='<div class="row"><div class="row" style="gap:12px"><div class="ic" style="width:44px;height:44px;border-radius:13px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px">'+rt.icon+'</div><div><div style="font-weight:600">'+rt.name+'</div><div class="muted">'+rt.dist+' km · '+rt.tag+'</div></div></div><div class="go">›</div></div>';
+    rl.appendChild(d);
+  });
+}
+function startRoute(rt){
+  toast("已选择路线："+rt.name);
+  navTo("run");
+}
+
+/* ============ RUN ============ */
+var run=null;
+function renderRun(){
+  var s=document.getElementById("screen-run");
+  if(run && (run.active||run.paused)){
+    drawRunActive();
+  } else {
+    var runs=getStore("runs",[]);
+    var last=runs[runs.length-1];
+    s.innerHTML='<div class="run-idle" style="display:flex;flex-direction:column;align-items:center;width:100%">'+
+      '<div class="big">🏃</div>'+
+      '<div class="t">准备开跑</div>'+
+      '<div class="s">'+(last?("上次："+kmToDisp(last.distanceKm)+" "+unitSuffix()+" · "+fmtTime(last.durationSec)):"还没有记录，开始第一次奔跑吧")+'</div>'+
+      '<button class="bigbtn" style="margin-top:10px" onclick="startRun()">🚀 开始跑步</button>'+
+      '</div>';
+  }
+}
+function drawRunActive(){
+  var s=document.getElementById("screen-run");
+  s.innerHTML=
+    '<div class="run-ring" id="run-ring" style="--p:0"><div class="inner">'+
+      '<div class="run-time" id="rt-time">0:00</div>'+
+      '<div class="run-sub" id="rt-state">跑步中</div>'+
+    '</div></div>'+
+    '<div class="run-stats">'+
+      '<div class="run-stat"><div class="v" id="rs-dist">0.00</div><div class="k">距离 '+unitSuffix()+'</div></div>'+
+      '<div class="run-stat"><div class="v" id="rs-pace">--\'--</div><div class="k">配速</div></div>'+
+      '<div class="run-stat"><div class="v" id="rs-cal">0</div><div class="k">kcal</div></div>'+
+    '</div>'+
+    '<div class="run-stats" style="margin-top:0">'+
+      '<div class="run-stat"><div class="v" id="rs-hr">--</div><div class="k">心率 bpm</div></div>'+
+      '<div class="run-stat"><div class="v" id="rs-step">0</div><div class="k">步数</div></div>'+
+      '<div class="run-stat"><div class="v" style="font-size:14px" id="rs-watch">未连</div><div class="k">手表</div></div>'+
+    '</div>'+
+    '<div class="run-controls">'+
+      (run.paused?'<button class="btn green" onclick="resumeRun()">继续</button>':'<button class="btn ghost" onclick="pauseRun()">暂停</button>')+
+      '<button class="btn" onclick="finishRun()">结束</button>'+
+    '</div>';
+  updateRunUI();
+}
+function startRun(){
+  run={active:true,paused:false,startTs:Date.now(),baseElapsed:0,elapsed:0,distanceKm:0,calories:0,steps:0,hr:120,timer:null};
+  drawRunActive();
+  run.timer=setInterval(tickRun,1000);
+}
+function tickRun(){
+  if(!run||run.paused) return;
+  run.elapsed=run.baseElapsed+Math.floor((Date.now()-run.startTs)/1000);
+  var inc=(1/360)*(0.8+Math.random()*0.4); // km per sec
+  run.distanceKm+=inc;
+  run.calories+=0.13;
+  run.steps+=Math.round(2+Math.random()*1.5);
+  var w=getStore("watch",null);
+  if(w){ run.hr=Math.round(125+Math.sin(run.elapsed/8)*18+Math.random()*6); }
+  else { run.hr=Math.round(115+Math.sin(run.elapsed/10)*22+Math.random()*6); }
+  updateRunUI();
+}
+function updateRunUI(){
+  if(!run) return;
+  var t=document.getElementById("rt-time"); if(t) t.textContent=fmtTime(run.elapsed);
+  var d=document.getElementById("rs-dist"); if(d) d.textContent=kmToDisp(run.distanceKm);
+  var p=document.getElementById("rs-pace"); if(p) p.textContent=fmtPace(run.distanceKm>0?run.elapsed/run.distanceKm:0);
+  var c=document.getElementById("rs-cal"); if(c) c.textContent=Math.round(run.calories);
+  var hr=document.getElementById("rs-hr"); if(hr) hr.textContent=run.hr;
+  var st=document.getElementById("rs-step"); if(st) st.textContent=run.steps;
+  var wv=document.getElementById("rs-watch"); var w=getStore("watch",null); if(wv) wv.textContent=w?("⌚"+w.name.slice(0,4)):"未连";
+  var ring=document.getElementById("run-ring"); if(ring){ var prog=Math.min(100, run.elapsed%60/60*100); ring.style.setProperty("--p",prog); }
+}
+function pauseRun(){ if(!run) return; run.paused=true; run.baseElapsed=run.elapsed; clearInterval(run.timer); drawRunActive(); document.getElementById("rt-state").textContent="已暂停"; }
+function resumeRun(){ if(!run) return; run.paused=false; run.startTs=Date.now(); run.timer=setInterval(tickRun,1000); drawRunActive(); document.getElementById("rt-state").textContent="跑步中"; }
+function finishRun(){
+  if(!run) return;
+  clearInterval(run.timer);
+  if(run.distanceKm<0.01){ toast("距离太短，已取消"); run=null; renderRun(); return; }
+  var avgPace=run.elapsed/run.distanceKm;
+  var record={id:uid(),date:Date.now(),durationSec:run.elapsed,distanceKm:run.distanceKm,calories:Math.round(run.calories),avgPaceSec:avgPace,steps:run.steps};
+  var runs=getStore("runs",[]); runs.push(record); store("runs",runs);
+  var rec=record;
+  run=null;
+  openModal(
+    '<h3>本次跑步完成 <button class="close" onclick="closeModal()">×</button></h3>'+
+    '<div class="summary-grid">'+
+      '<div class="st"><div class="v">'+kmToDisp(rec.distanceKm)+'</div><div class="k">'+unitSuffix()+'</div></div>'+
+      '<div class="st"><div class="v">'+fmtTime(rec.durationSec)+'</div><div class="k">时长</div></div>'+
+      '<div class="st"><div class="v">'+fmtPace(rec.avgPaceSec)+'</div><div class="k">平均配速</div></div>'+
+      '<div class="st"><div class="v">'+rec.calories+'</div><div class="k">kcal</div></div>'+
+    '</div>'+
+    '<button class="btn" onclick="afterFinish()">完成</button>'
+  );
+}
+function afterFinish(){ closeModal(); navTo("home"); }
+
+/* ============ HISTORY ============ */
+function renderHistory(){
+  var runs=getStore("runs",[]).slice().sort(function(a,b){return b.date-a.date;});
+  var box=document.getElementById("history-list");
+  if(runs.length===0){ box.innerHTML='<div class="empty">还没有跑步记录<br>去「跑步」开始第一次记录吧 🏃</div>'; return; }
+  box.innerHTML="";
+  runs.forEach(function(r){
+    var d=new Date(r.date);
+    var dateStr=(d.getMonth()+1)+"月"+d.getDate()+"日 "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+    var item=document.createElement("div"); item.className="card tap"; item.onclick=function(){showRunDetail(r);};
+    item.innerHTML='<div class="row"><div class="row" style="gap:14px"><div class="ic">🏃</div><div><div style="font-weight:600">'+kmToDisp(r.distanceKm)+' '+unitSuffix()+'</div><div class="muted">'+dateStr+'</div></div></div>'+
+      '<div style="text-align:right"><div class="accent" style="font-weight:700">'+fmtTime(r.durationSec)+'</div><div class="muted">'+fmtPace(r.avgPaceSec)+'/'+unitSuffix()+'</div></div></div>';
+    box.appendChild(item);
+  });
+}
+function showRunDetail(r){
+  var d=new Date(r.date);
+  openModal(
+    '<h3>跑步详情 <button class="close" onclick="closeModal()">×</button></h3>'+
+    '<div class="muted" style="margin-bottom:10px">'+(d.getMonth()+1)+"月"+d.getDate()+"日 "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+'</div>'+
+    '<div class="summary-grid">'+
+      '<div class="st"><div class="v">'+kmToDisp(r.distanceKm)+'</div><div class="k">'+unitSuffix()+'</div></div>'+
+      '<div class="st"><div class="v">'+fmtTime(r.durationSec)+'</div><div class="k">时长</div></div>'+
+      '<div class="st"><div class="v">'+fmtPace(r.avgPaceSec)+'</div><div class="k">配速</div></div>'+
+      '<div class="st"><div class="v">'+r.calories+'</div><div class="k">kcal</div></div>'+
+    '</div>'+
+    '<button class="btn ghost" onclick="deleteRun(\''+r.id+'\')">删除这条记录</button>'
+  );
+}
+function deleteRun(id){
+  var runs=getStore("runs",[]).filter(function(r){return r.id!==id;});
+  store("runs",runs); closeModal(); renderHistory(); toast("已删除");
+}
+
+/* ============ PLANS ============ */
+function renderPlans(){
+  var plans=getStore("plans",[]);
+  var done=plans.filter(function(p){return p.done;}).length;
+  var pct=plans.length?Math.round(done/plans.length*100):0;
+  document.getElementById("plan-pct").textContent=pct+"%";
+  document.getElementById("plan-bar").style.width=pct+"%";
+  var box=document.getElementById("plan-list"); box.innerHTML="";
+  plans.forEach(function(p){
+    var item=document.createElement("div"); item.className="card";
+    item.innerHTML='<div class="row"><div style="flex:1"><div style="font-weight:600">'+p.title+'</div><div class="muted" style="margin-top:4px">'+p.desc+'</div></div>'+
+      '<div class="check'+(p.done?" on":"")+'" onclick="togglePlan(\''+p.id+'\')">'+(p.done?"✓":"")+'</div></div>';
+    box.appendChild(item);
+  });
+}
+function togglePlan(id){
+  var plans=getStore("plans",[]);
+  plans=plans.map(function(p){ if(p.id===id) p.done=!p.done; return p; });
+  store("plans",plans); renderPlans();
+}
+
+/* ============ PROFILE ============ */
+function renderProfile(){
+  var u=currentUser(); if(!u) return;
+  document.getElementById("p-avatar").textContent=u.name.slice(0,1).toUpperCase();
+  document.getElementById("p-name").textContent=u.name;
+  document.getElementById("p-email").textContent=u.email;
+  document.getElementById("p-dist-u").textContent=unitSuffix();
+  var runs=getStore("runs",[]);
+  var dist=runs.reduce(function(a,r){return a+r.distanceKm;},0);
+  var time=runs.reduce(function(a,r){return a+r.durationSec;},0);
+  var cal=runs.reduce(function(a,r){return a+r.calories;},0);
+  document.getElementById("p-runs").textContent=runs.length;
+  document.getElementById("p-dist").textContent=kmToDisp(dist);
+  document.getElementById("p-time").textContent=fmtTime(time);
+  document.getElementById("p-cal").textContent=Math.round(cal);
+}
+function editName(){
+  var u=currentUser(); if(!u) return;
+  openModal(
+    '<h3>修改昵称 <button class="close" onclick="closeModal()">×</button></h3>'+
+    '<div class="field"><input id="new-name" type="text" value="'+u.name+'" maxlength="20" /></div>'+
+    '<button class="btn" onclick="saveName()">保存</button>'
+  );
+}
+function saveName(){
+  var v=document.getElementById("new-name").value.trim();
+  if(v.length<2){ toast("昵称至少 2 个字符"); return; }
+  var users=getUsers().map(function(x){ if(x.id===currentUser().id) x.name=v; return x; });
+  saveUsers(users); closeModal(); renderProfile(); toast("昵称已更新");
+}
+
+/* ============ WATCH ============ */
+var DEVICES=[
+  {id:"d1",name:"PaceRun Watch S1",icon:"⌚"},
+  {id:"d2",name:"PaceRun Band 2",icon:"📿"},
+  {id:"d3",name:"GT Runner Pro",icon:"🕒"}
+];
+function openWatch(){
+  var w=getStore("watch",null);
+  var html='<h3>我的设备 <button class="close" onclick="closeModal()">×</button></h3>';
+  if(w){
+    var wdev=DEVICES.find(function(d){return d.name===w.name;});
+    html+='<div class="dev"><div class="di">'+(wdev?wdev.icon:"⌚")+'</div><div style="flex:1"><div style="font-weight:600">'+w.name+'</div><div class="muted">电量 '+w.battery+'% · 已同步</div></div></div>';
+    html+='<button class="btn ghost" onclick="disconnectWatch()">断开连接</button>';
+  } else {
+    html+='<div class="muted" style="margin-bottom:10px">正在扫描附近设备…</div>';
+    DEVICES.forEach(function(d){
+      html+='<div class="dev"><div class="di">'+d.icon+'</div><div style="flex:1"><div style="font-weight:600">'+d.name+'</div><div class="muted">点击连接</div></div><button class="btn green" style="padding:10px 16px;font-size:14px" onclick="connectWatch(\''+d.id+'\')">连接</button></div>';
+    });
+  }
+  openModal(html);
+}
+function connectWatch(id){
+  var d=DEVICES.find(function(x){return x.id===id;});
+  store("watch",{name:d.name,battery:60+Math.floor(Math.random()*40),connectedAt:Date.now()});
+  toast("已连接 "+d.name);
+  openWatch();
+  if(document.getElementById("screen-home").classList.contains("active")) renderHome();
+}
+function disconnectWatch(){
+  store("watch",null); toast("已断开"); openWatch();
+  if(document.getElementById("screen-home").classList.contains("active")) renderHome();
+}
+
+/* ============ SETTINGS ============ */
+function openSettings(){
+  var s=getStore("settings",{});
+  var accents=["#FF8C42","#4ED5A2","#5AA9FF","#FF5C8A","#FFB347"];
+  var html='<h3>设置 <button class="close" onclick="closeModal()">×</button></h3>';
+  html+='<div class="opt"><div>距离单位</div><div class="seg-sm" id="unit-seg">'+
+    '<button class="'+(s.units!=="mi"?"on":"")+'" onclick="setUnit(\'km\')">公里</button>'+
+    '<button class="'+(s.units==="mi"?"on":"")+'" onclick="setUnit(\'mi\')">英里</button></div></div>';
+  html+='<div class="opt"><div>主题色</div><div class="row" id="accent-row">';
+  accents.forEach(function(c){ html+='<div class="swatch'+(s.accent===c?" on":"")+'" data-c="'+c+'" style="background:'+c+'" onclick="setAccent(\''+c+'\')"></div>'; });
+  html+='</div></div>';
+  html+='<div class="opt" onclick="clearData()" style="cursor:pointer"><div>清除所有本地数据</div><div class="go">›</div></div>';
+  html+='<div class="hint" style="margin-top:14px">PaceRun v1.0 · 数据保存在本机</div>';
+  openModal(html);
+}
+function setUnit(u){
+  var s=getStore("settings",{}); s.units=u; store("settings",s);
+  document.querySelectorAll("#unit-seg button").forEach(function(b){b.classList.toggle("on", (b.textContent==="公里"&&u==="km")||(b.textContent==="英里"&&u==="mi"));});
+  renderHome(); renderProfile();
+  toast("单位已切换为 "+(u==="mi"?"英里":"公里"));
+}
+function setAccent(c){
+  var s=getStore("settings",{}); s.accent=c; store("settings",s);
+  applyAccent();
+  document.querySelectorAll("#accent-row .swatch").forEach(function(sw){sw.classList.toggle("on", sw.getAttribute("data-c")===c);});
+  toast("主题色已更新");
+}
+function applyAccent(){
+  var s=getStore("settings",{});
+  if(s.accent) document.documentElement.style.setProperty("--accent", s.accent);
+}
+function clearData(){
+  openModal(
+    '<h3>清除本地数据 <button class="close" onclick="closeModal()">×</button></h3>'+
+    '<div class="muted" style="margin:6px 0 16px">将删除所有账号、跑步记录与设置，并退出登录。此操作不可恢复。</div>'+
+    '<div class="run-controls"><button class="btn ghost" onclick="closeModal()">取消</button>'+
+    '<button class="btn" style="background:var(--red);color:#fff" onclick="doClearData()">确认清除</button></div>'
+  );
+}
+function doClearData(){
+  ["users","session","runs","plans","watch","settings","routes"].forEach(function(k){ try{localStorage.removeItem(PREFIX+k);}catch(e){} });
+  store("session",null);
+  closeModal(); location.reload();
+}
+
+/* ============ modal / toast ============ */
+function openModal(html){ var r=document.getElementById("modal-root"); r.innerHTML='<div class="modal" onclick="event.stopPropagation()">'+html+'</div>'; r.classList.add("show"); }
+function closeModal(){ var r=document.getElementById("modal-root"); r.classList.remove("show"); r.innerHTML=""; }
+var toastTimer=null;
+function toast(msg){ var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},2200); }
+
+/* ============ boot ============ */
+(function boot(){
+  seedIfEmpty();
+  applyAccent();
+  var u=currentUser();
+  if(u){ enterApp(); } else { authTab("login"); }
+})();
+</script>
 </body>
 </html>
