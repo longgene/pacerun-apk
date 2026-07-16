@@ -164,6 +164,32 @@
   .days-pick span.on{background:var(--accent);color:#1a1206;border-color:var(--accent)}
   .wx-authorize{text-align:center;padding:10px 0}
   .wx-authorize .wx-logo{width:56px;height:56px;border-radius:16px;background:#07C160;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px}
+
+  /* ===== GPS / track ===== */
+  .gps-bar{display:flex;align-items:center;gap:10px;width:100%;background:var(--card);border-radius:14px;padding:10px 14px;margin:14px 0 4px;font-size:12px;text-align:left}
+  .gps-sig{width:10px;height:10px;border-radius:50%;background:var(--sub);flex-shrink:0;transition:.2s}
+  .gps-sig.good{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .gps-sig.mid{background:var(--yellow)}
+  .gps-sig.bad{background:var(--red)}
+  .gps-coord{flex:1;font-variant-numeric:tabular-nums;color:var(--text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gps-acc{color:var(--sub);flex-shrink:0;text-align:right}
+  .track-wrap{background:var(--card);border-radius:14px;padding:10px;margin:10px 0}
+  .track-canvas{width:100%;height:200px;display:block;border-radius:10px;background:#101013}
+  .track-legend{display:flex;gap:16px;justify-content:center;font-size:11px;color:var(--sub);margin-top:8px}
+  .track-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:middle}
+  .track-legend b{color:var(--text);font-weight:600}
+  .field select{background:var(--card);border:1.5px solid var(--line);border-radius:12px;color:var(--text);padding:13px 14px;font-size:15px;outline:none;width:100%;font-family:inherit}
+
+  /* ===== plan info bottom-sheet ===== */
+  .sheet-handle{width:38px;height:4px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+  .modal.dragging{transition:none}
+  .plan-info{display:flex;flex-direction:column;gap:2px;margin:8px 0 6px}
+  .plan-info .pi{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--line)}
+  .plan-info .pi:last-child{border-bottom:0}
+  .plan-info .pi .k{color:var(--sub);font-size:13px}
+  .plan-info .pi .v{font-weight:600;font-size:14px;text-align:right}
+  .tag-chip{padding:3px 11px;border-radius:9px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600;display:inline-block}
+  .tag-green{background:#4ED5A222;color:var(--green)}
 </style>
 </head>
 <body>
@@ -300,6 +326,7 @@
           <div class="stat"><div class="k">累计时长</div><div class="v" id="p-time">0:00</div></div>
           <div class="stat"><div class="k">累计消耗</div><div class="v"><span id="p-cal">0</span><span class="u">kcal</span></div></div>
         </div>
+        <div class="card" id="profile-plan-card" style="display:none"><div class="row"><div style="flex:1"><div style="font-weight:600" id="pp-title"></div><div class="muted" id="pp-meta"></div></div><button id="pp-view" class="btn green" style="padding:10px 14px;font-size:13px">查看</button></div></div>
         <div class="card tap" onclick="editName()"><div class="row"><div>✏️ 修改昵称</div><div class="go">›</div></div></div>
         <div class="card tap" onclick="openWatch()"><div class="row"><div>⌚ 我的设备</div><div class="go">›</div></div></div>
         <div class="card tap" onclick="openSettings()"><div class="row"><div>⚙️ 设置</div><div class="go">›</div></div></div>
@@ -335,9 +362,9 @@ function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(
 function seedIfEmpty(){
   if(getStore("plans",null)===null){
     store("plans",[
-      {id:uid(),title:"新手 5K 计划",desc:"每周 3 次，循序渐进跑到 5 公里",targetKm:5,weeks:4,days:[1,3,5],done:false,source:"seed"},
-      {id:uid(),title:"减脂燃脂计划",desc:"慢跑结合间歇，提升代谢效率",targetKm:4,weeks:6,days:[2,4,6],done:false,source:"seed"},
-      {id:uid(),title:"半马备战",desc:"12 周系统训练，冲击 21.1 KM",targetKm:21.1,weeks:12,days:[1,3,5,6],done:false,source:"seed"}
+      {id:uid(),title:"新手 5K 计划",desc:"每周 3 次，循序渐进跑到 5 公里",targetKm:5,weeks:4,days:[1,3,5],done:false,source:"seed",type:"跑步",targetMin:30},
+      {id:uid(),title:"减脂燃脂计划",desc:"慢跑结合间歇，提升代谢效率",targetKm:4,weeks:6,days:[2,4,6],done:false,source:"seed",type:"健走",targetMin:40},
+      {id:uid(),title:"半马备战",desc:"12 周系统训练，冲击 21.1 KM",targetKm:21.1,weeks:12,days:[1,3,5,6],done:false,source:"seed",type:"跑步",targetMin:60}
     ]);
   }
   if(getStore("routes",null)===null){
@@ -537,6 +564,96 @@ function renderHome(){
 }
 function startRoute(rt){ toast("已选择路线："+rt.name); navTo("run"); }
 
+/* ============ GPS ============ */
+var gpsWatch=null;      // watchPosition 句柄
+var runGps=[];          // 本次跑步轨迹：{lat,lng,t,acc,weak,sim}
+var gpsFails=0;         // 连续定位失败计数
+var gpsMode="none";     // none | gps | sim
+function haversine(a,b){
+  var R=6371000, toR=Math.PI/180;
+  var dLat=(b.lat-a.lat)*toR, dLng=(b.lng-a.lng)*toR;
+  var s=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a.lat*toR)*Math.cos(b.lat*toR)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2*R*Math.asin(Math.sqrt(s)); // 米
+}
+function lastGoodGps(){ for(var i=runGps.length-1;i>=0;i--){ if(!runGps[i].weak) return runGps[i]; } return null; }
+function recomputeDistance(){
+  if(!run) return;
+  var d=0;
+  for(var i=1;i<runGps.length;i++){
+    if(runGps[i].weak||runGps[i-1].weak) continue; // 断点处不相连
+    d+=haversine(runGps[i-1],runGps[i]);
+  }
+  run.distanceKm=d/1000;
+}
+function speedNow(){
+  var g=lastGoodGps(); if(!g||runGps.length<2) return 0;
+  var prev=null;
+  for(var i=runGps.length-2;i>=0;i--){ if(!runGps[i].weak){ prev=runGps[i]; break; } }
+  if(!prev) return 0;
+  var dt=(g.t-prev.t)/1000; if(dt<=0) return 0;
+  return haversine(prev,g)/dt; // m/s
+}
+function onGps(pos){
+  if(!run) return;
+  gpsFails=0;
+  var c=pos.coords;
+  if(c.latitude===0&&c.longitude===0) return; // 空岛(Null Island)防护
+  var pt={lat:c.latitude,lng:c.longitude,t:Date.now(),acc:(c.accuracy||0),weak:false,sim:false};
+  var weak=pt.acc>80;                          // 精度差 => 弱信号
+  var last=lastGoodGps();
+  if(last&&!weak){
+    var dd=haversine(last,pt), dt=(pt.t-last.t)/1000;
+    if(dt>0 && (dd/dt)>12){ weak=true; pt.jump=true; } // 跳点 => 断开，避免轨迹飞线
+  }
+  pt.weak=weak;
+  runGps.push(pt);
+  recomputeDistance();
+  updateGpsUI();
+}
+function onGpsErr(err){
+  if(!run) return;
+  gpsFails++;
+  if(err&&err.code===1){ toast("定位权限被拒绝，改用演示轨迹"); stopGPS(); startGpsSim(); return; }
+  if(gpsFails>=4){ toast("GPS 信号弱，切换为演示轨迹"); stopGPS(); startGpsSim(); return; }
+  // 否则继续监听（watchPosition 会自动重试）
+}
+function startGPS(){
+  runGps=[]; gpsFails=0; gpsMode="none";
+  if(!("geolocation" in navigator)){ toast("设备不支持定位，使用演示轨迹"); startGpsSim(); return; }
+  try{
+    gpsWatch=navigator.geolocation.watchPosition(onGps,onGpsErr,{enableHighAccuracy:true,maximumAge:0,timeout:15000});
+    gpsMode="gps";
+  }catch(e){ startGpsSim(); }
+}
+function stopGPS(){ if(gpsWatch!=null){ try{navigator.geolocation.clearWatch(gpsWatch);}catch(e){} gpsWatch=null; } gpsMode="none"; }
+/* 演示降级：无 GPS 信号时生成平滑回路，保证轨迹功能可观 */
+var gpsSimTimer=null;
+function startGpsSim(){
+  gpsMode="sim";
+  var base={lat:31.2304,lng:121.4737}, bearing=0;
+  var prev={lat:base.lat,lng:base.lng,t:Date.now(),acc:5,weak:false,sim:true};
+  runGps.push(prev);
+  gpsSimTimer=setInterval(function(){
+    bearing+=(Math.random()-0.5)*0.6;
+    var step=2.5+Math.random()*1.5; // 每 tick 约 2.5-4m
+    var dLat=step*Math.cos(bearing)/111320;
+    var dLng=step*Math.sin(bearing)/(111320*Math.cos(base.lat*Math.PI/180));
+    var pt={lat:prev.lat+dLat,lng:prev.lng+dLng,t:Date.now(),acc:5,weak:false,sim:true};
+    runGps.push(pt); prev=pt; recomputeDistance(); updateGpsUI();
+  },1000);
+  toast("演示轨迹模式（无 GPS 信号）");
+}
+function stopGpsSim(){ if(gpsSimTimer){ clearInterval(gpsSimTimer); gpsSimTimer=null; } }
+function updateGpsUI(){
+  var g=lastGoodGps(); if(!g) return;
+  var sig=document.getElementById("gps-sig");
+  if(sig){ var a=g.acc; sig.className="gps-sig "+(a<=20?"good":a<=50?"mid":"bad"); }
+  var co=document.getElementById("gps-coord");
+  if(co){ co.textContent=g.lat.toFixed(5)+", "+g.lng.toFixed(5)+(g.sim?" · 演示":""); }
+  var ac=document.getElementById("gps-acc");
+  if(ac){ ac.textContent="±"+(a|0)+"m · "+(speedNow()*3.6).toFixed(1)+"km/h"; }
+}
+
 /* ============ RUN ============ */
 var run=null;
 var liveWatch=null;
@@ -565,23 +682,31 @@ function drawRunActive(){
       '<div class="run-stat"><div class="v" id="rs-step">0</div><div class="k">步数</div></div>'+
       '<div class="run-stat"><div class="v" style="font-size:13px" id="rs-watch">未连</div><div class="k">手表</div></div>'+
     '</div>'+
+    '<div class="gps-bar">'+
+      '<div class="gps-sig" id="gps-sig"></div>'+
+      '<div class="gps-coord" id="gps-coord">定位中…</div>'+
+      '<div class="gps-acc" id="gps-acc"></div>'+
+    '</div>'+
     '<div class="run-controls">'+
       (run.paused?'<button class="btn green" onclick="resumeRun()">继续</button>':'<button class="btn ghost" onclick="pauseRun()">暂停</button>')+
       '<button class="btn" onclick="finishRun()">结束</button></div>';
   updateRunUI();
+  updateGpsUI();
 }
 function startRun(){
   run={active:true,paused:false,startTs:Date.now(),baseElapsed:0,elapsed:0,distanceKm:0,calories:0,steps:0,hr:null,timer:null};
+  runGps=[]; gpsMode="none";
   drawRunActive();
   run.timer=setInterval(tickRun,1000);
+  startGPS();
 }
 function tickRun(){
   if(!run||run.paused) return;
   run.elapsed=run.baseElapsed+Math.floor((Date.now()-run.startTs)/1000);
-  run.distanceKm+=(1/360)*(0.8+Math.random()*0.4);
   run.calories+=0.13;
   run.steps+=Math.round(2+Math.random()*1.5);
   run.hr = (liveWatch && liveWatch.hr)? liveWatch.hr : null;
+  // 距离由 GPS 轨迹实时计算（recomputeDistance）；演示降级轨迹同样写入 runGps
   updateRunUI();
 }
 function updateRunUI(){
@@ -598,23 +723,68 @@ function updateRunUI(){
 function pauseRun(){ if(!run) return; run.paused=true; run.baseElapsed=run.elapsed; clearInterval(run.timer); drawRunActive(); document.getElementById("rt-state").textContent="已暂停"; }
 function resumeRun(){ if(!run) return; run.paused=false; run.startTs=Date.now(); run.timer=setInterval(tickRun,1000); drawRunActive(); document.getElementById("rt-state").textContent="跑步中"; }
 function finishRun(){
-  if(!run) return; clearInterval(run.timer);
-  if(run.distanceKm<0.01){ toast("距离太短，已取消"); run=null; renderRun(); return; }
+  if(!run) return; clearInterval(run.timer); stopGPS(); stopGpsSim();
+  if(run.distanceKm<0.01 && runGps.length<2){ toast("距离太短，已取消"); run=null; renderRun(); return; }
   var avgPace=run.elapsed/run.distanceKm;
-  var record={id:uid(),date:Date.now(),durationSec:run.elapsed,distanceKm:run.distanceKm,calories:Math.round(run.calories),avgPaceSec:avgPace,steps:run.steps,hrPeak:run.hr};
+  var record={id:uid(),date:Date.now(),durationSec:run.elapsed,distanceKm:run.distanceKm,calories:Math.round(run.calories),avgPaceSec:avgPace,steps:run.steps,hrPeak:run.hr,
+              track:runGps.map(function(p){return {lat:p.lat,lng:p.lng,weak:!!p.weak,sim:!!p.sim};}), gpsMode:gpsMode};
   var runs=getStore("runs",[]); runs.push(record); store("runs",runs);
   var rec=record; run=null;
   openModal(
     '<h3>本次跑步完成 <button class="close" onclick="closeModal()">×</button></h3>'+
+    '<div class="muted" style="margin-bottom:6px">定位方式：'+(rec.gpsMode==="gps"?"GPS 实时":rec.gpsMode==="sim"?"演示轨迹":"未记录")+'</div>'+
     '<div class="summary-grid">'+
       '<div class="st"><div class="v">'+kmToDisp(rec.distanceKm)+'</div><div class="k">'+unitSuffix()+'</div></div>'+
       '<div class="st"><div class="v">'+fmtTime(rec.durationSec)+'</div><div class="k">时长</div></div>'+
       '<div class="st"><div class="v">'+fmtPace(rec.avgPaceSec)+'</div><div class="k">平均配速</div></div>'+
       '<div class="st"><div class="v">'+rec.calories+'</div><div class="k">kcal</div></div>'+
-    '</div><button class="btn" onclick="afterFinish()">完成</button>'
+    '</div>'+
+    (rec.track && rec.track.length>=2 ? '<div class="track-wrap"><canvas id="finish-track" class="track-canvas"></canvas>'+
+      '<div class="track-legend"><span><i style="background:var(--green)"></i>起点</span><span><i style="background:var(--accent)"></i>轨迹 (<b>'+rec.track.length+'</b> 点)</span><span><i style="background:var(--red)"></i>终点</span></div></div>' : '')+
+    '<button class="btn" onclick="afterFinish()">完成</button>'
   );
+  if(rec.track && rec.track.length>=2){ setTimeout(function(){ drawTrack(document.getElementById("finish-track"), rec.track); }, 60); }
 }
 function afterFinish(){ closeModal(); navTo("home"); }
+
+/* ============ TRACK MAP ============ */
+function drawTrack(canvas, track){
+  if(!canvas || !track || track.length<2) return;
+  var ctx=canvas.getContext("2d");
+  if(!ctx) return;
+  var dpr=window.devicePixelRatio||1;
+  var W=canvas.width=Math.max(1,canvas.clientWidth*dpr);
+  var H=canvas.height=Math.max(1,canvas.clientHeight*dpr);
+  ctx.clearRect(0,0,W,H);
+  // 地图网格底纹
+  ctx.strokeStyle="#232327"; ctx.lineWidth=1;
+  for(var gx=0;gx<W;gx+=W/8){ ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke(); }
+  for(var gy=0;gy<H;gy+=H/8){ ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke(); }
+  var lats=track.map(function(p){return p.lat;}), lngs=track.map(function(p){return p.lng;});
+  var minLat=Math.min.apply(null,lats),maxLat=Math.max.apply(null,lats);
+  var minLng=Math.min.apply(null,lngs),maxLng=Math.max.apply(null,lngs);
+  var spanLat=Math.max(maxLat-minLat,1e-6), spanLng=Math.max(maxLng-minLng,1e-6);
+  var pad=18*dpr;
+  var sx=function(lng){ return pad+(maxLng===minLng?0.5:(lng-minLng)/spanLng)*(W-2*pad); };
+  var sy=function(lat){ return pad+(1-(maxLat===minLat?0.5:(lat-minLat)/spanLat))*(H-2*pad); };
+  // 轨迹折线（断点处断开）
+  var accent=getComputedStyle(document.documentElement).getPropertyValue("--accent")||"#FF8C42";
+  ctx.lineWidth=4*dpr; ctx.lineJoin="round"; ctx.lineCap="round"; ctx.strokeStyle=accent;
+  ctx.beginPath(); var started=false;
+  for(var i=0;i<track.length;i++){
+    var p=track[i];
+    if(p.weak){ started=false; continue; }
+    var X=sx(p.lng), Y=sy(p.lat);
+    if(!started){ ctx.moveTo(X,Y); started=true; } else ctx.lineTo(X,Y);
+  }
+  ctx.stroke();
+  // 起终点标记
+  function mark(pt,color){ var X=sx(pt.lng),Y=sy(pt.lat); ctx.fillStyle=color; ctx.beginPath(); ctx.arc(X,Y,7*dpr,0,Math.PI*2); ctx.fill(); }
+  var first=null; for(var a=0;a<track.length;a++){ if(!track[a].weak){ first=track[a]; break; } }
+  var last=null; for(var b=track.length-1;b>=0;b--){ if(!track[b].weak){ last=track[b]; break; } }
+  if(first) mark(first,"#4ED5A2");
+  if(last) mark(last,"#FF5C5C");
+}
 
 /* ============ HISTORY ============ */
 function renderHistory(){
@@ -631,9 +801,11 @@ function renderHistory(){
 }
 function showRunDetail(r){
   var d=new Date(r.date);
+  var hasTrack=r.track && r.track.length>=2;
   openModal(
     '<h3>跑步详情 <button class="close" onclick="closeModal()">×</button></h3>'+
-    '<div class="muted" style="margin-bottom:10px">'+(d.getMonth()+1)+"月"+d.getDate()+"日 "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+'</div>'+
+    '<div class="muted" style="margin-bottom:10px">'+(d.getMonth()+1)+"月"+d.getDate()+"日 "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+(r.gpsMode?(" · "+(r.gpsMode==="gps"?"GPS 实时":"演示轨迹")):"")+'</div>'+
+    (hasTrack?'<div class="track-wrap"><canvas id="detail-track" class="track-canvas"></canvas><div class="track-legend"><span><i style="background:var(--green)"></i>起点</span><span><i style="background:var(--accent)"></i>轨迹</span><span><i style="background:var(--red)"></i>终点</span></div></div>':'')+
     '<div class="summary-grid">'+
       '<div class="st"><div class="v">'+kmToDisp(r.distanceKm)+'</div><div class="k">'+unitSuffix()+'</div></div>'+
       '<div class="st"><div class="v">'+fmtTime(r.durationSec)+'</div><div class="k">时长</div></div>'+
@@ -641,6 +813,7 @@ function showRunDetail(r){
       '<div class="st"><div class="v">'+r.calories+'</div><div class="k">kcal</div></div>'+
     '</div><button class="btn ghost" onclick="deleteRun(\''+r.id+'\')">删除这条记录</button>'
   );
+  if(hasTrack){ setTimeout(function(){ drawTrack(document.getElementById("detail-track"), r.track); }, 60); }
 }
 function deleteRun(id){ var runs=getStore("runs",[]).filter(function(r){return r.id!==id;}); store("runs",runs); closeModal(); renderHistory(); toast("已删除"); }
 
@@ -658,12 +831,13 @@ function renderPlans(){
   plans.forEach(function(p){
     var meta=(p.targetKm?p.targetKm+" km · ":"")+(p.weeks?p.weeks+"周 · ":"")+"每周"+(p.days?p.days.length:0)+"天";
     var item=document.createElement("div"); item.className="card";
-    item.innerHTML='<div class="row"><div style="flex:1"><div style="font-weight:600">'+p.title+'</div>'+
+    item.innerHTML='<div class="row"><div style="flex:1;cursor:pointer" onclick="showPlanModal(\''+p.id+'\')"><div style="font-weight:600">'+p.title+' <span class="tag-chip">'+(p.type||"跑步")+'</span></div>'+
       '<div class="muted" style="margin-top:4px">'+p.desc+'</div>'+
       '<div class="plan-meta">'+meta+' · <span class="badge">'+planSourceLabel(p.source)+'</span></div></div>'+
       '<div style="display:flex;flex-direction:column;gap:8px;align-items:center">'+
       '<div class="check'+(p.done?" on":"")+'" onclick="togglePlan(\''+p.id+'\')">'+(p.done?"✓":"")+'</div>'+
-      '<div class="row" style="gap:6px"><span class="mini-btn" onclick="openPlanEditor(\''+p.id+'\')">✎</span>'+
+      '<div class="row" style="gap:6px"><span class="mini-btn" style="width:auto;padding:0 10px;font-size:12px" onclick="showPlanModal(\''+p.id+'\')">详情</span>'+
+      '<span class="mini-btn" onclick="openPlanEditor(\''+p.id+'\')">✎</span>'+
       '<span class="mini-btn" onclick="askDeletePlan(\''+p.id+'\')">🗑</span></div></div></div>';
     box.appendChild(item);
   });
@@ -675,6 +849,11 @@ function openPlanEditor(id){
   var html='<h3>'+(p?"编辑计划":"新建计划")+' <button class="close" onclick="closeModal()">×</button></h3>';
   html+='<div class="field"><label>计划名称</label><input id="pl-title" type="text" value="'+(p?p.title:"")+'" maxlength="30" placeholder="例如：10K 进阶" /></div>';
   html+='<div class="field"><label>描述</label><input id="pl-desc" type="text" value="'+(p?p.desc:"")+'" maxlength="60" placeholder="一句话说明目标" /></div>';
+  var types=["跑步","健走","骑行","游泳","综合"];
+  html+='<div class="row" style="gap:10px"><div class="field" style="flex:1"><label>运动类型</label><select id="pl-type">';
+  for(var ti=0;ti<types.length;ti++){ html+='<option'+(p&&p.type===types[ti]?' selected':'')+'>'+types[ti]+'</option>'; }
+  html+='</select></div>'+
+    '<div class="field" style="flex:1"><label>目标时长(分)</label><input id="pl-min" type="number" min="1" step="1" value="'+(p?p.targetMin:"30")+'" /></div></div>';
   html+='<div class="row" style="gap:10px"><div class="field" style="flex:1"><label>目标里程(km)</label><input id="pl-km" type="number" min="0" step="0.1" value="'+(p?p.targetKm:"5")+'" /></div>'+
     '<div class="field" style="flex:1"><label>周期(周)</label><input id="pl-weeks" type="number" min="1" step="1" value="'+(p?p.weeks:"4")+'" /></div></div>';
   html+='<div class="field"><label>每周训练日</label><div class="days-pick" id="pl-days">';
@@ -688,12 +867,14 @@ function savePlan(id){
   var title=document.getElementById("pl-title").value.trim();
   if(title.length<1){ toast("请填写计划名称"); return; }
   var desc=document.getElementById("pl-desc").value.trim();
+  var type=document.getElementById("pl-type").value;
+  var targetMin=parseInt(document.getElementById("pl-min").value,10)||30;
   var km=parseFloat(document.getElementById("pl-km").value)||0;
   var weeks=parseInt(document.getElementById("pl-weeks").value,10)||1;
   var days=document.getElementById("pl-days-val").value?document.getElementById("pl-days-val").value.split(",").map(Number):[];
   var plans=getStore("plans",[]);
-  if(id){ plans=plans.map(function(p){ if(p.id===id){ p.title=title;p.desc=desc;p.targetKm=km;p.weeks=weeks;p.days=days; } return p; }); }
-  else { plans.push({id:uid(),title:title,desc:desc,targetKm:km,weeks:weeks,days:days,done:false,source:"custom"}); }
+  if(id){ plans=plans.map(function(p){ if(p.id===id){ p.title=title;p.desc=desc;p.type=type;p.targetMin=targetMin;p.targetKm=km;p.weeks=weeks;p.days=days; } return p; }); }
+  else { plans.push({id:uid(),title:title,desc:desc,type:type,targetMin:targetMin,targetKm:km,weeks:weeks,days:days,done:false,source:"custom"}); }
   store("plans",plans); closeModal(); renderPlans(); toast("已保存");
 }
 function askDeletePlan(id){
@@ -714,7 +895,7 @@ function openImport(){
   html+='<button class="btn ghost" onclick="importFromUrl()">从链接导入</button>';
   openModal(html);
 }
-function normalizePlan(o){ return {id:uid(),title:String(o.title||"未命名计划"),desc:String(o.desc||""),targetKm:parseFloat(o.targetKm)||0,weeks:parseInt(o.weeks,10)||1,days:Array.isArray(o.days)?o.days.map(Number):[1,3,5],done:false,source:"import"}; }
+function normalizePlan(o){ return {id:uid(),title:String(o.title||"未命名计划"),desc:String(o.desc||""),targetKm:parseFloat(o.targetKm)||0,weeks:parseInt(o.weeks,10)||1,days:Array.isArray(o.days)?o.days.map(Number):[1,3,5],done:false,source:"import",type:String(o.type||"跑步"),targetMin:parseInt(o.targetMin,10)||30}; }
 function importFromJson(){
   var txt=document.getElementById("imp-json").value.trim();
   if(!txt){ toast("请先粘贴 JSON"); return; }
@@ -726,9 +907,9 @@ function importFromJson(){
 }
 function importSample(){
   var samples=[
-    {title:"马拉松 16 周进阶",desc:"从 5K 到全马系统训练",targetKm:42.2,weeks:16,days:[2,4,6]},
-    {title:"燃脂塑形 8 周",desc:"间歇跑+力量，高效减脂",targetKm:5,weeks:8,days:[1,3,5]},
-    {title:"晨跑习惯养成",desc:"每天 30 分钟轻松跑",targetKm:3,weeks:4,days:[0,1,2,3,4,5,6]}
+    {title:"马拉松 16 周进阶",desc:"从 5K 到全马系统训练",targetKm:42.2,weeks:16,days:[2,4,6],type:"跑步",targetMin:75},
+    {title:"燃脂塑形 8 周",desc:"间歇跑+力量，高效减脂",targetKm:5,weeks:8,days:[1,3,5],type:"健走",targetMin:40},
+    {title:"晨跑习惯养成",desc:"每天 30 分钟轻松跑",targetKm:3,weeks:4,days:[0,1,2,3,4,5,6],type:"跑步",targetMin:30}
   ];
   var plans=getStore("plans",[]); samples.forEach(function(o){ var p=normalizePlan(o); p.source="sample"; plans.push(p); });
   store("plans",plans); closeModal(); renderPlans(); toast("已导入示例计划");
@@ -741,6 +922,51 @@ function importFromUrl(){
     var arr=Array.isArray(data)?data:[data]; var plans=getStore("plans",[]);
     arr.forEach(function(o){ plans.push(normalizePlan(o)); }); store("plans",plans); closeModal(); renderPlans(); toast("已导入 "+arr.length+" 条计划");
   }).catch(function(e){ toast("链接获取失败："+e.message+"（可能被 CORS 限制，建议改用粘贴 JSON）"); });
+}
+
+/* ============ PLAN INFO SHEET (gesture-close) ============ */
+function planRow(k,v){ return '<div class="pi"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; }
+function showPlanModal(id){
+  var p=getStore("plans",[]).find(function(x){return x.id===id;});
+  if(!p) return;
+  var daysTxt=(p.days&&p.days.length)?p.days.map(function(d){return DAY_LABELS[d];}).join("、"):"未设置";
+  var html='<div class="sheet-handle"></div>'+
+    '<h3 style="justify-content:center;text-align:center">'+p.title+'</h3>'+
+    '<div class="plan-info">'+
+      planRow("运动类型",'<span class="tag-chip">'+(p.type||"跑步")+'</span>')+
+      planRow("目标距离",(p.targetKm?p.targetKm+" "+unitSuffix():"—"))+
+      planRow("目标时长",(p.targetMin?p.targetMin+" 分钟":"—"))+
+      planRow("计划周期",(p.weeks?p.weeks+" 周":"—"))+
+      planRow("每周训练日",daysTxt)+
+      planRow("完成状态",p.done?'<span class="tag-chip tag-green">已完成</span>':'<span class="tag-chip">进行中</span>')+
+    '</div>'+
+    '<div class="progress"><i style="width:'+(p.done?100:0)+'%"></i></div>'+
+    '<div class="run-controls" style="margin-top:16px">'+
+      '<button class="btn ghost" onclick="togglePlan(\''+p.id+'\')">'+(p.done?"标记未完成":"标记完成")+'</button>'+
+      '<button class="btn green" onclick="openPlanEditor(\''+p.id+'\')">编辑</button></div>'+
+    '<button class="btn" style="margin-top:12px" onclick="goRun()">开始本次训练</button>'+
+    '<div class="hint" style="margin-top:10px">↓ 下拉弹窗或点击空白处关闭</div>';
+  openSheet(html);
+}
+function openSheet(html){
+  var r=document.getElementById("modal-root");
+  r.innerHTML='<div class="modal" id="active-sheet" onclick="event.stopPropagation()">'+html+'</div>';
+  r.classList.add("show");
+  var m=document.getElementById("active-sheet");
+  var startY=0, dy=0, dragging=false;
+  m.addEventListener("touchstart",function(e){
+    if(e.target && e.target.closest && e.target.closest("button,input,textarea,select,.plan-info")) return;
+    startY=e.touches[0].clientY; dragging=true; dy=0; m.classList.add("dragging");
+  },{passive:true});
+  m.addEventListener("touchmove",function(e){
+    if(!dragging) return;
+    dy=e.touches[0].clientY-startY; if(dy<0) dy=0;
+    m.style.transform="translateY("+dy+"px)";
+  },{passive:true});
+  m.addEventListener("touchend",function(e){
+    if(!dragging) return; dragging=false; m.style.transition=".2s"; m.classList.remove("dragging");
+    if(dy>110){ closeModal(); } else { m.style.transform="translateY(0)"; }
+  });
 }
 
 /* ============ PROFILE ============ */
@@ -758,6 +984,11 @@ function renderProfile(){
   document.getElementById("p-dist").textContent=kmToDisp(dist);
   document.getElementById("p-time").textContent=fmtTime(time);
   document.getElementById("p-cal").textContent=Math.round(cal);
+  var plans=getStore("plans",[]);
+  var next=plans.find(function(p){return !p.done;})||plans[0];
+  var pcard=document.getElementById("profile-plan-card");
+  if(next){ pcard.style.display=""; document.getElementById("pp-title").textContent=next.title; document.getElementById("pp-meta").textContent=(next.type||"跑步")+" · "+(next.targetKm?next.targetKm+"km ":"")+(next.targetMin?next.targetMin+"分钟":""); document.getElementById("pp-view").setAttribute("onclick","showPlanModal('"+next.id+"')"); }
+  else { pcard.style.display="none"; }
 }
 function editName(){
   var u=currentUser(); if(!u) return;
