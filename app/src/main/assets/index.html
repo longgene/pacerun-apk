@@ -352,6 +352,8 @@
 "use strict";
 /* ============ storage ============ */
 var PREFIX="pr_";
+var APP_VERSION="1.0.0";   // 与 app/build.gradle 中 versionName 保持一致
+var WECHAT_APPID="";       // 填入微信开放平台移动应用 AppID 后，微信登录自动走真实 OAuth2 授权码流程
 var mem={};
 function store(k,v){ try{ localStorage.setItem(PREFIX+k, typeof v==="string"?v:JSON.stringify(v)); }catch(e){ mem[k]=v; } }
 function getStore(k,def){ try{ var s=localStorage.getItem(PREFIX+k); return s==null?def:JSON.parse(s); }catch(e){ return (k in mem)?mem[k]:def; } }
@@ -475,14 +477,27 @@ function loginByPhone(){
   setSession(user.id,true);
   toast("登录成功"); enterApp(); return false;
 }
-/* ---- wechat login (demo flow; real deployment needs WeChat Open Platform appId + backend) ---- */
+/* ---- wechat login ----
+   真实接入步骤（需你提供素材）：
+   1) 微信开放平台(open.weixin.qq.com)注册移动应用，拿到 AppID / AppSecret；
+   2) 配置“授权回调域名”（需你自己的 https 服务端，用于 code→access_token 交换）；
+   3) 将 AppID 填入上方 WECHAT_APPID 常量，点击即跳转微信标准 OAuth2 授权；
+   4) 回调页用 code 调你的后端换取 openid，再写入本应用账号。
+   当前为离线 WebView 壳、无后端，未配置 AppID 时走演示授权，保证流程可用。 */
 function wechatLogin(){
+  if(WECHAT_APPID){
+    var state=uid();
+    var cb="https://YOUR_CALLBACK_DOMAIN/wechat/callback"; // 替换为你的授权回调地址
+    var url="https://open.weixin.qq.com/connect/oauth2/authorize?appid="+encodeURIComponent(WECHAT_APPID)+
+      "&redirect_uri="+encodeURIComponent(cb)+"&response_type=code&scope=snsapi_userinfo&state="+state+"#wechat_redirect";
+    location.href=url; return;
+  }
   openModal(
     '<h3>微信授权 <button class="close" onclick="closeModal()">×</button></h3>'+
     '<div class="wx-authorize"><div class="wx-logo">💬</div>'+
     '<div style="font-weight:700">PaceRun 申请使用以下信息</div>'+
     '<div class="muted" style="margin:8px 0">昵称、头像</div>'+
-    '<div class="muted" style="font-size:11px;margin-bottom:14px">演示模式：未接入真实微信开放平台，将模拟授权返回</div>'+
+    '<div class="muted" style="font-size:11px;margin-bottom:14px">演示模式：未配置微信 AppID，将模拟授权返回（配置后自动走真实授权）</div>'+
     '<button class="btn wx" onclick="wechatConfirm()">确认登录</button>'+
     '<button class="btn ghost" style="margin-top:10px" onclick="closeModal()">取消</button></div>'
   );
@@ -1093,11 +1108,36 @@ function closeModal(){ var r=document.getElementById("modal-root"); r.classList.
 var toastTimer=null;
 function toast(msg){ var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},2400); }
 
+/* ============ 版本与更新 ============ */
+function cmpVer(a,b){
+  var x=String(a).split(".").map(Number), y=String(b).split(".").map(Number);
+  for(var i=0;i<3;i++){ var d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0;
+}
+function checkUpdate(){
+  // 与 GitHub Releases latest 对比版本号，发现新版本则弹窗引导下载
+  fetch("https://api.github.com/repos/Longgene/Pacerun-apk/releases/latest")
+    .then(function(r){ if(!r.ok) throw new Error("no-release"); return r.json(); })
+    .then(function(rel){
+      var latest=(rel.tag_name||"").replace(/^v/,"");
+      if(latest && cmpVer(latest, APP_VERSION)>0){
+        var asset=(rel.assets||[]).find(function(a){ return /\.apk$/i.test(a.name||""); });
+        var url=asset?asset.browser_download_url:(rel.html_url||"");
+        openModal(
+          '<h3>发现新版本 v'+latest+' <button class="close" onclick="closeModal()">×</button></h3>'+
+          '<div class="muted" style="margin:12px 0">当前版本 v'+APP_VERSION+'，建议更新以获得更好体验。</div>'+
+          (url?'<a class="btn wx" style="text-decoration:none;display:block;text-align:center" href="'+url+'">下载更新</a>':'')+
+          '<button class="btn ghost" style="margin-top:10px" onclick="closeModal()">稍后再说</button>'
+        );
+      }
+    }).catch(function(e){ /* 无网络或暂无 release 时静默忽略 */ });
+}
+
 /* ============ boot ============ */
 (function boot(){
   seedIfEmpty(); applyAccent();
   var u=currentUser();
   if(u){ enterApp(); } else { authTab("login"); setLoginMethod("email"); }
+  setTimeout(checkUpdate, 1500);
 })();
 </script>
 </body>
