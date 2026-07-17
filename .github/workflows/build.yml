@@ -26,14 +26,25 @@ jobs:
           yes | sdkmanager --licenses
           sdkmanager "platforms;android-33" "build-tools;33.0.2"
 
-      - name: Build debug APK
+      - name: Decode signing key
+        if: ${{ secrets.SIGNING_KEY != '' }}
+        run: echo "$SIGNING_KEY" | base64 -d > release.p12
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+
+      - name: Build release APK
         uses: gradle/gradle-build-action@v3
         with:
           gradle-version: '8.5'
-          arguments: assembleDebug
+          arguments: assembleRelease
+        env:
+          SIGNING_KEY_FILE: ${{ github.workspace }}/release.p12
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: pacerun-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: pacerun-release-apk
+          path: app/build/outputs/apk/release/*.apk
